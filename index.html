@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>114文學院工作坊123</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+    }
+    header {
+      background: #333;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+    }
+ 
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .mainContainer{
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      right:0;
+      left:0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .in-block{
+    flex:1;  overflow-y: scroll;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="mainContainer">
+    
+       <header>
+    <h1>歡迎來到我的網站</h1>
+  </header>
+
+  <div class="in-block">
+    <div style="margin:10px">
+    <h2>Hello World</h2>
+    <h3>按鈕範例</h3>
+    <button onclick="alert('你點擊了按鈕！')">點擊我</button>
+    </div>
+    
+  </div>
+     
+
+  <footer style="text-align: center; padding: 10px; background: #333; color: #fff;">
+    &copy; 2025 範例網站
+  </footer>
+  </div>
+
+</body>
+</html>
