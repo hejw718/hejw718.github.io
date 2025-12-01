@@ -1,77 +1,1010 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>114文學院工作坊123</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-    }
-    header {
-      background: #333;
-      color: #fff;
-      padding: 10px 0;
-      text-align: center;
-    }
- 
-    button {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>巴黎五天四夜 | 2026/2/15-19</title>
+    <style>
+        :root {
+            --primary-color: #1a4a6e;
+            --accent-color: #f9d923;
+            --danger-color: #a02828;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+            --header-height: 120px;
+            --tab-height: 56px;
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
 
-    .mainContainer{
-      width: 100%;
-      height: 100%;
-      position: fixed;
-      top: 0;
-      right:0;
-      left:0;
-      bottom: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    .in-block{
-    flex:1;  overflow-y: scroll;
-    }
-    
-  </style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 固定頂部導航 */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2563a8 100%);
+            color: white;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            will-change: transform;
+        }
+
+        .header-content {
+            padding: 16px 20px 12px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Tab 導航 - 橫向滑動 */
+        .tab-nav-wrapper {
+            position: relative;
+            background: var(--card-bg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .tab-nav {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            will-change: scroll-position;
+        }
+
+        .tab-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-item {
+            flex: 0 0 auto;
+            padding: 16px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab-item.active {
+            border-bottom-color: var(--accent-color);
+        }
+
+        .tab-day {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .tab-date {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .tab-item.active .tab-day {
+            color: var(--primary-color);
+        }
+
+        /* 內容區域 */
+        .app-content {
+            margin-top: var(--header-height);
+            min-height: calc(100vh - var(--header-height));
+            padding-bottom: 20px;
+        }
+
+        .day-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .day-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 行程卡片 */
+        .timeline {
+            padding: 16px;
+        }
+
+        .trip-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+            will-change: transform;
+            cursor: pointer;
+        }
+
+        .trip-card:active {
+            transform: scale(0.98);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+            padding: 16px;
+            color: white;
+        }
+
+        .card-category {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .card-time {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: #153a5a;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:active {
+            background: #dee2e6;
+        }
+
+        /* 交通卡片 */
+        .transit-card {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #007bff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .transit-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .transit-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .transit-duration {
+            font-size: 14px;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 4px;
+        }
+
+        .transit-route {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            z-index: 1;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f3f5;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            float: right;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 8px;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-info-item {
+            margin-bottom: 16px;
+        }
+
+        .modal-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .modal-value {
+            font-size: 15px;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            padding: 16px 20px 32px;
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 響應式 */
+        @media (min-width: 768px) {
+            .modal.active {
+                align-items: center;
+                justify-content: center;
+            }
+
+            .modal-content {
+                max-width: 600px;
+                border-radius: 20px;
+                max-height: 90vh;
+            }
+        }
+
+        /* 效能優化 */
+        .will-change-transform {
+            will-change: transform;
+        }
+
+        .gpu-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="mainContainer">
-    
-       <header>
-    <h1>歡迎來到我的網站</h1>
-  </header>
+    <!-- 固定頂部 -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="header-title">🇫🇷 巴黎五天四夜</h1>
+            <p class="header-subtitle">2026/2/15 (日) - 2/19 (四)</p>
+        </div>
 
-  <div class="in-block">
-    <div style="margin:10px">
-    <h2>Hello World</h2>
-    <h3>按鈕範例</h3>
-    <button onclick="alert('你點擊了按鈕！')">點擊我</button>
+        <!-- Tab 導航 -->
+        <div class="tab-nav-wrapper">
+            <nav class="tab-nav" id="tabNav">
+                <div class="tab-item active" data-day="1">
+                    <div class="tab-day">Day 1</div>
+                    <div class="tab-date">2/15 週日</div>
+                </div>
+                <div class="tab-item" data-day="2">
+                    <div class="tab-day">Day 2</div>
+                    <div class="tab-date">2/16 週一</div>
+                </div>
+                <div class="tab-item" data-day="3">
+                    <div class="tab-day">Day 3</div>
+                    <div class="tab-date">2/17 週二</div>
+                </div>
+                <div class="tab-item" data-day="4">
+                    <div class="tab-day">Day 4</div>
+                    <div class="tab-date">2/18 週三</div>
+                </div>
+                <div class="tab-item" data-day="5">
+                    <div class="tab-day">Day 5</div>
+                    <div class="tab-date">2/19 週四</div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 內容區域 -->
+    <main class="app-content" id="appContent"></main>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal()">×</button>
+                <h2 class="modal-title" id="modalTitle"></h2>
+            </div>
+            <div class="modal-image" id="modalImage"></div>
+            <div class="modal-body">
+                <div class="modal-info-item">
+                    <div class="modal-label">時間</div>
+                    <div class="modal-value" id="modalTime"></div>
+                </div>
+                <div class="modal-info-item">
+                    <div class="modal-label">地點</div>
+                    <div class="modal-value" id="modalLocation"></div>
+                </div>
+                <div class="modal-info-item">
+                    <div class="modal-label">說明</div>
+                    <div class="modal-value" id="modalDescription"></div>
+                </div>
+                <div class="modal-info-item">
+                    <div class="modal-label">營業時間</div>
+                    <div class="modal-value" id="modalHours"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <a id="modalMapLink" target="_blank" class="btn-action btn-secondary">📍 查看地圖</a>
+                <a id="modalNavLink" target="_blank" class="btn-action btn-primary">🚗 開始導航</a>
+            </div>
+        </div>
     </div>
-    
-  </div>
-     
 
-  <footer style="text-align: center; padding: 10px; background: #333; color: #fff;">
-    &copy; 2025 範例網站
-  </footer>
-  </div>
+    <script>
+        // 資料結構 - 所有行程資料
+        const itineraryData = {
+            1: {
+                title: 'Day 1 | 抵達巴黎、瑪黑區 & 蒙馬特',
+                items: [
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '15 分鐘',
+                        route: '從飯店前往 Café Charlot<br>Grands Boulevards → Filles du Calvaire (M8)'
+                    },
+                    {
+                        type: 'card',
+                        category: '早餐',
+                        title: 'Café Charlot',
+                        time: '08:30',
+                        description: '瑪黑區經典咖啡廳,抵達後的第一餐',
+                        hours: ['通常營業時間:每日 08:00 開始'],
+                        location: 'Café Charlot Paris',
+                        image: 'https://images.unsplash.com/photo-1627941014589-983375b63750?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '12 分鐘',
+                        route: '前往沃日廣場 (950公尺)'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '沃日廣場',
+                        time: '09:45',
+                        description: '拍攝精緻紅磚建築,在廣場上閒晃',
+                        hours: ['公園開放時間:通常 08:00 - 20:00'],
+                        location: 'Place des Vosges Paris',
+                        image: 'https://images.unsplash.com/photo-1549479366-c956c38722b5?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '15 分鐘',
+                        route: '前往 BHV 百貨 (1.2公里)'
+                    },
+                    {
+                        type: 'card',
+                        category: '購物',
+                        title: 'BHV Marais 百貨',
+                        time: '11:00',
+                        description: '可利用 10% 折價券。外國遊客憑護照領取',
+                        hours: ['週一至週六 10:00 - 20:00', '週日 11:00 - 19:00'],
+                        location: 'BHV Marais Paris',
+                        image: 'https://images.unsplash.com/photo-1629838779948-433e147d337a?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '12 分鐘',
+                        route: '前往 Ober Mamma<br>Hôtel de Ville (M11) → Oberkampf (M5)'
+                    },
+                    {
+                        type: 'card',
+                        category: '午餐',
+                        title: 'Ober Mamma',
+                        time: '12:00',
+                        description: '人氣義式餐廳,建議提早排隊',
+                        hours: ['通常 12:00 開始營業'],
+                        location: 'Ober Mamma Paris',
+                        image: 'https://images.unsplash.com/photo-1582239339097-9e4a3b19280d?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '30 分鐘',
+                        route: '前往聖心堂<br>Oberkampf (M5) → Gare du Nord → Anvers (M2)'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '聖心堂',
+                        time: '14:30',
+                        description: '俯瞰巴黎全景',
+                        hours: ['教堂每日 06:00 - 22:30'],
+                        location: 'Sacré-Cœur Paris',
+                        image: 'https://images.unsplash.com/photo-1558235284-18090516629c?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '8 分鐘',
+                        route: '前往愛牆 (550公尺)'
+                    },
+                    {
+                        type: 'card',
+                        category: '拍照',
+                        title: '愛牆',
+                        time: '15:30',
+                        description: '蒙馬特人氣景點,311種語言的我愛你',
+                        hours: ['位於公園內,依公園時間開放'],
+                        location: 'Le Mur des Je t\'aime Paris',
+                        image: 'https://images.unsplash.com/photo-1579808386348-e867d716493b?w=800'
+                    }
+                ]
+            },
+            2: {
+                title: 'Day 2 | 蒙聖米歇爾 Mont Saint-Michel',
+                items: [
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '20 分鐘',
+                        route: '從飯店前往蒙帕納斯車站<br>Grands Boulevards (M8/M9) → Montparnasse Bienvenüe'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚂',
+                        duration: '06:48 - 10:00',
+                        route: '前往蒙聖米歇爾<br>06:48 TGV → 08:15 雷恩 → 08:45 接駁巴士 → 10:00 抵達'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '蒙聖米歇爾修道院',
+                        time: '10:00 - 17:00',
+                        description: '世界遺產,全天觀光',
+                        hours: ['09:30 - 18:00'],
+                        location: 'Mont Saint-Michel Abbey',
+                        image: 'https://images.unsplash.com/photo-1583838271701-d700e3e96191?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚂',
+                        duration: '17:00 - 21:16',
+                        route: '返回巴黎<br>17:00 巴士發車 → 18:15 雷恩 → 19:35 TGV → 21:16 抵達巴黎'
+                    }
+                ]
+            },
+            3: {
+                title: 'Day 3 | 凱旋門、遊船與左岸',
+                items: [
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '25 分鐘',
+                        route: '從飯店出發前往凱旋門<br>Grands Boulevards → Charles de Gaulle Étoile'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '凱旋門',
+                        time: '10:00',
+                        description: '登頂俯瞰香榭麗舍大道',
+                        hours: ['每日 10:00 - 22:30'],
+                        location: 'Arc de Triomphe Paris',
+                        image: 'https://images.unsplash.com/photo-1549117652-3a521c7d2c3e?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '10 分鐘',
+                        route: '前往亞歷山大三世橋<br>Charles de Gaulle Étoile → Champs-Élysées - Clemenceau'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '亞歷山大三世橋',
+                        time: '14:50',
+                        description: '巴黎最華麗的橋樑,適合拍照',
+                        hours: ['全天開放'],
+                        location: 'Pont Alexandre III Paris',
+                        image: 'https://images.unsplash.com/photo-1523588288593-1e5e04e8d35e?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '21 分鐘',
+                        route: '前往遊船碼頭 (1.6公里)'
+                    },
+                    {
+                        type: 'card',
+                        category: '活動',
+                        title: '塞納河遊船',
+                        time: '16:45',
+                        description: 'Bateaux Parisiens,享受黃昏遊船',
+                        hours: ['建議提前15分鐘抵達'],
+                        location: 'Bateaux Parisiens',
+                        image: 'https://images.unsplash.com/photo-1580979848130-b3e1a0b3f86e?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '25 分鐘',
+                        route: '前往晚餐地點<br>Iéna (M9) → École Militaire (M8)'
+                    },
+                    {
+                        type: 'card',
+                        category: '晚餐',
+                        title: 'Le Crépuscule',
+                        time: '18:15',
+                        description: '道地法式可麗餅 (鹹/甜)',
+                        hours: ['請查閱官網確認'],
+                        location: 'Le Crépuscule Paris',
+                        image: 'https://images.unsplash.com/photo-1577782390886-07469a4c14c5?w=800'
+                    }
+                ]
+            },
+            4: {
+                title: 'Day 4 | 巴黎迪士尼 + Outlet',
+                items: [
+                    {
+                        type: 'transit',
+                        icon: '🚈',
+                        duration: '出發',
+                        route: '從飯店出發前往迪士尼<br>RER A 線:往 Marne-la-Vallée – Chessy'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '巴黎迪士尼',
+                        time: '09:30',
+                        description: '全天遊玩',
+                        hours: ['09:30 - 22:00'],
+                        location: 'Disneyland Paris',
+                        image: 'https://images.unsplash.com/photo-1596700813936-7c913c9e6d8a?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚈',
+                        duration: '15 分鐘',
+                        route: '前往 Outlet<br>RER A 線:1 站 (Val d\'Europe)'
+                    },
+                    {
+                        type: 'card',
+                        category: '購物',
+                        title: '山谷購物村',
+                        time: '15:15',
+                        description: 'La Vallée Village Outlet',
+                        hours: ['每日 10:00 - 20:00'],
+                        location: 'La Vallée Village',
+                        image: 'https://images.unsplash.com/photo-1599026466981-d1a1b1a0e1b1?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚈',
+                        duration: '17 分鐘',
+                        route: '返回迪士尼<br>RER A 線:1 站'
+                    },
+                    {
+                        type: 'card',
+                        category: '活動',
+                        title: '迪士尼煙火秀',
+                        time: '22:00',
+                        description: '閉園煙火與燈光秀',
+                        hours: ['時間請依 App 為準'],
+                        location: 'Disneyland Paris',
+                        image: 'https://images.unsplash.com/photo-1606555541094-a10c14c5c2a1?w=800'
+                    }
+                ]
+            },
+            5: {
+                title: 'Day 5 | 羅浮宮、奧賽、塞納河畔',
+                items: [
+                    {
+                        type: 'transit',
+                        icon: '🚇',
+                        duration: '12 分鐘',
+                        route: '從飯店出發前往羅浮宮<br>Grands Boulevards → Palais Royal - Musée du Louvre'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '羅浮宮',
+                        time: '09:15',
+                        description: '週四開放,務必預約',
+                        hours: ['09:00 - 18:00'],
+                        location: 'Louvre Museum Paris',
+                        image: 'https://images.unsplash.com/photo-1549722736-218044738734?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '11 分鐘',
+                        route: '前往杜樂麗花園 (800公尺)'
+                    },
+                    {
+                        type: 'card',
+                        category: '活動',
+                        title: '杜樂麗花園',
+                        time: '14:00',
+                        description: '買輕食野餐',
+                        hours: ['07:30 - 19:30'],
+                        location: 'Jardin des Tuileries Paris',
+                        image: 'https://images.unsplash.com/photo-1570779836365-a6e5b22b109c?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '5 分鐘',
+                        route: '前往奧賽美術館 (過橋)'
+                    },
+                    {
+                        type: 'card',
+                        category: '景點',
+                        title: '奧賽美術館',
+                        time: '15:15',
+                        description: '欣賞印象派畫作',
+                        hours: ['09:30 - 18:00 (週四至 21:45)'],
+                        location: 'Musée d\'Orsay Paris',
+                        image: 'https://images.unsplash.com/photo-1550992388-517f8b9e6918?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '28 分鐘',
+                        route: '前往莎士比亞書店 (2公里)'
+                    },
+                    {
+                        type: 'card',
+                        category: '書店',
+                        title: '莎士比亞書店',
+                        time: '18:00',
+                        description: '左岸傳奇書店',
+                        hours: ['10:00 - 21:00'],
+                        location: 'Shakespeare and Company Paris',
+                        image: 'https://images.unsplash.com/photo-1517487213459-a5e2b0a3c267?w=800'
+                    },
+                    {
+                        type: 'transit',
+                        icon: '🚶',
+                        duration: '10 分鐘',
+                        route: '前往餐廳'
+                    },
+                    {
+                        type: 'card',
+                        category: '晚餐',
+                        title: 'Chez René',
+                        time: '18:35',
+                        description: '左岸經典法式料理',
+                        hours: ['12:00–14:30, 19:30–22:30'],
+                        location: 'Chez René Paris',
+                        image: 'https://images.unsplash.com/photo-1577782390886-07469a4c14c5?w=800'
+                    }
+                ]
+            }
+        };
 
+        // 效能優化的 Tab 切換
+        const tabNav = document.getElementById('tabNav');
+        const appContent = document.getElementById('appContent');
+        const tabItems = document.querySelectorAll('.tab-item');
+        const modal = document.getElementById('modal');
+
+        let currentDay = 1;
+        const loadedDays = new Set();
+
+        // 初始化
+        function init() {
+            renderDay(1);
+            loadedDays.add(1);
+        }
+
+        // 事件委派 - Tab 切換
+        tabNav.addEventListener('click', (e) => {
+            const tab = e.target.closest('.tab-item');
+            if (!tab) return;
+
+            const day = parseInt(tab.dataset.day);
+            if (day === currentDay) return;
+
+            switchDay(day);
+        }, { passive: true });
+
+        function switchDay(day) {
+            // 移除舊的 active
+            tabItems[currentDay - 1].classList.remove('active');
+
+            // 添加新的 active
+            currentDay = day;
+            tabItems[day - 1].classList.add('active');
+
+            // 滾動 Tab 到可見位置
+            tabItems[day - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            // 渲染內容
+            if (!loadedDays.has(day)) {
+                renderDay(day);
+                loadedDays.add(day);
+            } else {
+                // 切換顯示
+                document.querySelectorAll('.day-content').forEach(el => el.classList.remove('active'));
+                const targetDay = appContent.querySelector(`.day-content[data-day="${day}"]`);
+                if (targetDay) {
+                    targetDay.classList.add('active');
+                }
+            }
+        }
+
+        // 渲染單天內容
+        function renderDay(day) {
+            const data = itineraryData[day];
+            if (!data) return;
+
+            const dayContent = document.createElement('div');
+            dayContent.className = 'day-content active';
+            dayContent.dataset.day = day;
+
+            const timeline = document.createElement('div');
+            timeline.className = 'timeline';
+
+            data.items.forEach(item => {
+                if (item.type === 'transit') {
+                    timeline.appendChild(createTransitCard(item));
+                } else if (item.type === 'card') {
+                    timeline.appendChild(createTripCard(item));
+                }
+            });
+
+            dayContent.appendChild(timeline);
+
+            // 移除其他天的 active
+            document.querySelectorAll('.day-content').forEach(el => el.classList.remove('active'));
+
+            appContent.appendChild(dayContent);
+        }
+
+        // 創建交通卡片
+        function createTransitCard(data) {
+            const card = document.createElement('div');
+            card.className = 'transit-card';
+            card.innerHTML = `
+                <div class="transit-icon">${data.icon}</div>
+                <div class="transit-info">
+                    <div class="transit-duration">${data.duration}</div>
+                    <div class="transit-route">${data.route}</div>
+                </div>
+            `;
+            return card;
+        }
+
+        // 創建行程卡片
+        function createTripCard(data) {
+            const card = document.createElement('div');
+            card.className = 'trip-card';
+            card.onclick = () => showModal(data);
+
+            card.innerHTML = `
+                <div class="card-image" style="background-image: url('${data.image}')">
+                    <div class="card-overlay">
+                        <div class="card-category">${data.category}</div>
+                        <div class="card-title">${data.title}</div>
+                        <div class="card-time">${data.time}</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-description">${data.description}</div>
+                    <div class="card-actions">
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.location)}" 
+                           target="_blank" class="btn-action btn-secondary" onclick="event.stopPropagation()">
+                            📍 地圖
+                        </a>
+                        <a href="https://www.google.com/maps/dir/?api=1&origin=Leonardo+Boutique+Hotel+Paris+Opera&destination=${encodeURIComponent(data.location)}" 
+                           target="_blank" class="btn-action btn-primary" onclick="event.stopPropagation()">
+                            🚗 導航
+                        </a>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // Modal 函數
+        function showModal(data) {
+            document.getElementById('modalTitle').textContent = data.category + ':' + data.title;
+            document.getElementById('modalTime').textContent = data.time;
+            document.getElementById('modalLocation').textContent = data.location;
+            document.getElementById('modalDescription').textContent = data.description;
+            document.getElementById('modalImage').style.backgroundImage = `url('${data.image}')`;
+
+            const hoursHtml = data.hours.map(h => `<div>${h}</div>`).join('');
+            document.getElementById('modalHours').innerHTML = hoursHtml;
+
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.location)}`;
+            const navUrl = `https://www.google.com/maps/dir/?api=1&origin=Leonardo+Boutique+Hotel+Paris+Opera&destination=${encodeURIComponent(data.location)}`;
+
+            document.getElementById('modalMapLink').href = mapUrl;
+            document.getElementById('modalNavLink').href = navUrl;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 點擊背景關閉
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // 效能優化: Passive 事件監聽
+        document.addEventListener('touchstart', () => { }, { passive: true });
+
+        // 啟動
+        init();
+    </script>
 </body>
+
 </html>
