@@ -8,21 +8,21 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>巴黎五天四夜 | 2026/2/15-19</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         :root {
-            --primary-color: #1a4a6e;
-            --accent-color: #f9d923;
-            --danger-color: #a02828;
-            --bg-color: #f8f9fa;
+            /* 簡約配色 */
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
-            --text-primary: #212529;
-            --text-secondary: #6c757d;
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
-            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
-            --header-height: 120px;
-            --tab-height: 56px;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+            /* 尺寸 */
+            --header-height: 110px;
             --border-radius: 12px;
-            --transition-speed: 0.3s;
         }
 
         * {
@@ -33,13 +33,30 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-color);
             color: var(--text-primary);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
         }
+
+        /* 動態背景效果 */
+        /* body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255, 0, 110, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 217, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        } */
 
         /* 固定頂部導航 */
         .app-header {
@@ -47,11 +64,10 @@
             top: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #2563a8 100%);
-            color: white;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
             z-index: 100;
-            box-shadow: var(--shadow-md);
-            will-change: transform;
+            box-shadow: var(--shadow);
         }
 
         .header-content {
@@ -62,20 +78,20 @@
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 4px;
-            letter-spacing: -0.3px;
+            color: var(--text-primary);
         }
 
         .header-subtitle {
             font-size: 13px;
-            opacity: 0.9;
+            color: var(--text-secondary);
             font-weight: 400;
         }
 
-        /* Tab 導航 - 橫向滑動 */
+        /* Tab 導航 */
         .tab-nav-wrapper {
             position: relative;
-            background: var(--card-bg);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            /* background: white; */
+            /* border-bottom: 1px solid var(--border-color); */
         }
 
         .tab-nav {
@@ -86,7 +102,6 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             -ms-overflow-style: none;
-            will-change: scroll-position;
         }
 
         .tab-nav::-webkit-scrollbar {
@@ -95,23 +110,22 @@
 
         .tab-item {
             flex: 0 0 auto;
-            padding: 16px 20px;
+            padding: 14px 20px;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
             user-select: none;
             white-space: nowrap;
-            position: relative;
         }
 
         .tab-item.active {
-            border-bottom-color: var(--accent-color);
+            border-bottom-color: var(--primary-color);
         }
 
         .tab-day {
             font-size: 14px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text-secondary);
             margin-bottom: 2px;
         }
 
@@ -124,16 +138,22 @@
             color: var(--primary-color);
         }
 
+        .tab-item.active .tab-date {
+            color: var(--primary-color);
+        }
+
         /* 內容區域 */
         .app-content {
             margin-top: var(--header-height);
             min-height: calc(100vh - var(--header-height));
             padding-bottom: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .day-content {
             display: none;
-            animation: fadeIn 0.3s ease-out;
+            animation: fadeIn 0.3s;
         }
 
         .day-content.active {
@@ -143,12 +163,10 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
             }
         }
 
@@ -159,17 +177,16 @@
 
         .trip-card {
             background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             margin-bottom: 12px;
             overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.2s, box-shadow 0.2s;
-            will-change: transform;
-            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.2s;
         }
 
         .trip-card:active {
-            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .card-image {
@@ -180,26 +197,34 @@
             position: relative;
         }
 
+        .card-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 60%);
+        }
+
         .card-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
             padding: 16px;
             color: white;
+            z-index: 1;
         }
 
         .card-category {
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            opacity: 0.9;
+            font-weight: 600;
             margin-bottom: 4px;
+            opacity: 0.9;
         }
 
         .card-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             margin-bottom: 4px;
         }
@@ -220,11 +245,44 @@
             margin-bottom: 12px;
         }
 
+        /* 展開詳細資訊 */
+        .card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .card-details.expanded {
+            max-height: 500px;
+        }
+
+        .card-details-content {
+            padding: 16px;
+            background: #f8fafc;
+        }
+
+        .detail-item {
+            margin-bottom: 12px;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
         .card-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             padding-top: 12px;
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
         }
 
         .btn-action {
@@ -250,25 +308,40 @@
         }
 
         .btn-primary:active {
-            background: #153a5a;
+            background: #1d4ed8;
         }
 
         .btn-secondary {
-            background: #e9ecef;
+            background: #f1f5f9;
             color: var(--text-primary);
         }
 
         .btn-secondary:active {
-            background: #dee2e6;
+            background: #e2e8f0;
+        }
+
+        .btn-expand {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--primary-color);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         /* 交通卡片 */
         .transit-card {
-            background: #f8f9fa;
-            border-radius: var(--border-radius);
+            background: #eff6ff;
+            border-radius: 8px;
             padding: 14px 16px;
             margin-bottom: 12px;
-            border-left: 4px solid #007bff;
+            border-left: 3px solid var(--primary-color);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -287,7 +360,7 @@
         .transit-duration {
             font-size: 14px;
             font-weight: 700;
-            color: #007bff;
+            color: var(--primary-color);
             margin-bottom: 4px;
         }
 
@@ -297,132 +370,65 @@
             line-height: 1.4;
         }
 
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            animation: fadeIn 0.2s;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+        /* 天氣卡片 */
+        .weather-card {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            border-left: 3px solid #f59e0b;
         }
 
-        .modal.active {
-            display: flex;
-            align-items: flex-end;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px 20px 0 0;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-
-            to {
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 20px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-            z-index: 1;
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #f1f3f5;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            float: right;
+        .weather-header {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
         }
 
-        .modal-title {
+        .weather-icon {
+            font-size: 32px;
+        }
+
+        .weather-main {
+            flex: 1;
+        }
+
+        .weather-temp {
             font-size: 20px;
             font-weight: 700;
-            color: var(--primary-color);
-            margin-top: 8px;
+            color: #92400e;
         }
 
-        .modal-image {
-            width: 100%;
-            height: 200px;
-            background-size: cover;
-            background-position: center;
+        .weather-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
-        .modal-body {
-            padding: 20px;
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
         }
 
-        .modal-info-item {
-            margin-bottom: 16px;
-        }
-
-        .modal-label {
+        .weather-detail-item {
             font-size: 12px;
+        }
+
+        .weather-detail-label {
+            font-size: 10px;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
         }
 
-        .modal-value {
-            font-size: 15px;
+        .weather-detail-value {
+            font-weight: 600;
             color: var(--text-primary);
-            line-height: 1.5;
-        }
-
-        .modal-actions {
-            padding: 16px 20px 32px;
-            display: flex;
-            gap: 12px;
-        }
-
-        /* 響應式 */
-        @media (min-width: 768px) {
-            .modal.active {
-                align-items: center;
-                justify-content: center;
-            }
-
-            .modal-content {
-                max-width: 600px;
-                border-radius: 20px;
-                max-height: 90vh;
-            }
-        }
-
-        /* 效能優化 */
-        .will-change-transform {
-            will-change: transform;
-        }
-
-        .gpu-accelerated {
-            transform: translateZ(0);
-            backface-visibility: hidden;
         }
     </style>
 </head>
@@ -465,44 +471,20 @@
     <!-- 內容區域 -->
     <main class="app-content" id="appContent"></main>
 
-    <!-- Modal -->
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeModal()">×</button>
-                <h2 class="modal-title" id="modalTitle"></h2>
-            </div>
-            <div class="modal-image" id="modalImage"></div>
-            <div class="modal-body">
-                <div class="modal-info-item">
-                    <div class="modal-label">時間</div>
-                    <div class="modal-value" id="modalTime"></div>
-                </div>
-                <div class="modal-info-item">
-                    <div class="modal-label">地點</div>
-                    <div class="modal-value" id="modalLocation"></div>
-                </div>
-                <div class="modal-info-item">
-                    <div class="modal-label">說明</div>
-                    <div class="modal-value" id="modalDescription"></div>
-                </div>
-                <div class="modal-info-item">
-                    <div class="modal-label">營業時間</div>
-                    <div class="modal-value" id="modalHours"></div>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <a id="modalMapLink" target="_blank" class="btn-action btn-secondary">📍 查看地圖</a>
-                <a id="modalNavLink" target="_blank" class="btn-action btn-primary">🚗 開始導航</a>
-            </div>
-        </div>
-    </div>
-
     <script>
         // 資料結構 - 所有行程資料
         const itineraryData = {
             1: {
                 title: 'Day 1 | 抵達巴黎、瑪黑區 & 蒙馬特',
+                weather: {
+                    temp: '8°C',
+                    high: '10°C',
+                    low: '5°C',
+                    condition: '多雲',
+                    icon: '⛅',
+                    rain: '20%',
+                    suggestion: '建議穿著厚外套,早晚溫差大'
+                },
                 items: [
                     {
                         type: 'transit',
@@ -599,11 +581,30 @@
                         hours: ['位於公園內,依公園時間開放'],
                         location: 'Le Mur des Je t\'aime Paris',
                         image: 'https://images.unsplash.com/photo-1579808386348-e867d716493b?w=800'
+                    },
+                    {
+                        type: 'card',
+                        category: '晚餐',
+                        title: 'Pink Mamma',
+                        time: '18:30',
+                        description: '網紅義式餐廳,玻璃屋頂',
+                        hours: ['需提前預約'],
+                        location: 'Pink Mamma Paris',
+                        image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800'
                     }
                 ]
             },
             2: {
                 title: 'Day 2 | 蒙聖米歇爾 Mont Saint-Michel',
+                weather: {
+                    temp: '7°C',
+                    high: '9°C',
+                    low: '4°C',
+                    condition: '晴時多雲',
+                    icon: '🌤️',
+                    rain: '10%',
+                    suggestion: '海邊風大,建議穿防風外套'
+                },
                 items: [
                     {
                         type: 'transit',
@@ -637,6 +638,15 @@
             },
             3: {
                 title: 'Day 3 | 凱旋門、遊船與左岸',
+                weather: {
+                    temp: '9°C',
+                    high: '11°C',
+                    low: '6°C',
+                    condition: '晴朗',
+                    icon: '☀️',
+                    rain: '5%',
+                    suggestion: '適合戶外活動,記得戴太陽眼鏡'
+                },
                 items: [
                     {
                         type: 'transit',
@@ -706,6 +716,15 @@
             },
             4: {
                 title: 'Day 4 | 巴黎迪士尼 + Outlet',
+                weather: {
+                    temp: '10°C',
+                    high: '12°C',
+                    low: '7°C',
+                    condition: '部分多雲',
+                    icon: '⛅',
+                    rain: '15%',
+                    suggestion: '全天戶外,建議穿舒適保暖衣物'
+                },
                 items: [
                     {
                         type: 'transit',
@@ -759,6 +778,15 @@
             },
             5: {
                 title: 'Day 5 | 羅浮宮、奧賽、塞納河畔',
+                weather: {
+                    temp: '8°C',
+                    high: '10°C',
+                    low: '5°C',
+                    condition: '陰天',
+                    icon: '☁️',
+                    rain: '40%',
+                    suggestion: '可能下雨,建議攜帶雨具'
+                },
                 items: [
                     {
                         type: 'transit',
@@ -848,7 +876,6 @@
         const tabNav = document.getElementById('tabNav');
         const appContent = document.getElementById('appContent');
         const tabItems = document.querySelectorAll('.tab-item');
-        const modal = document.getElementById('modal');
 
         let currentDay = 1;
         const loadedDays = new Set();
@@ -907,6 +934,11 @@
             const timeline = document.createElement('div');
             timeline.className = 'timeline';
 
+            // 加入天氣卡片
+            if (data.weather) {
+                timeline.appendChild(createWeatherCard(data.weather));
+            }
+
             data.items.forEach(item => {
                 if (item.type === 'transit') {
                     timeline.appendChild(createTransitCard(item));
@@ -921,6 +953,36 @@
             document.querySelectorAll('.day-content').forEach(el => el.classList.remove('active'));
 
             appContent.appendChild(dayContent);
+        }
+
+        // 創建天氣卡片
+        function createWeatherCard(weather) {
+            const card = document.createElement('div');
+            card.className = 'weather-card';
+            card.innerHTML = `
+                <div class="weather-header">
+                    <div class="weather-icon">${weather.icon}</div>
+                    <div class="weather-main">
+                        <div class="weather-temp">${weather.temp}</div>
+                        <div class="weather-desc">${weather.condition}</div>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="weather-detail-item">
+                        <div class="weather-detail-label">高溫/低溫</div>
+                        <div class="weather-detail-value">${weather.high} / ${weather.low}</div>
+                    </div>
+                    <div class="weather-detail-item">
+                        <div class="weather-detail-label">降雨機率</div>
+                        <div class="weather-detail-value">${weather.rain}</div>
+                    </div>
+                    <div class="weather-detail-item" style="grid-column: 1 / -1;">
+                        <div class="weather-detail-label">建議</div>
+                        <div class="weather-detail-value">${weather.suggestion}</div>
+                    </div>
+                </div>
+            `;
+            return card;
         }
 
         // 創建交通卡片
@@ -941,25 +1003,45 @@
         function createTripCard(data) {
             const card = document.createElement('div');
             card.className = 'trip-card';
-            card.onclick = () => showModal(data);
+
+            const cardId = 'card-' + Math.random().toString(36).substr(2, 9);
 
             card.innerHTML = `
                 <div class="card-image" style="background-image: url('${data.image}')">
                     <div class="card-overlay">
                         <div class="card-category">${data.category}</div>
                         <div class="card-title">${data.title}</div>
-                        <div class="card-time">${data.time}</div>
+                        <div class="card-time">⏰ ${data.time}</div>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="card-description">${data.description}</div>
+                    <button class="btn-expand" onclick="toggleDetails('${cardId}')">
+                        <span id="${cardId}-icon">▼</span> 查看詳細資訊
+                    </button>
+                    <div class="card-details" id="${cardId}">
+                        <div class="card-details-content">
+                            <div class="detail-item">
+                                <div class="detail-label">時間</div>
+                                <div class="detail-value">${data.time}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">地點</div>
+                                <div class="detail-value">${data.location}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">營業時間</div>
+                                <div class="detail-value">${data.hours.join('<br>')}</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card-actions">
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.location)}" 
-                           target="_blank" class="btn-action btn-secondary" onclick="event.stopPropagation()">
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.location)}" target="_blank"
+                           class="btn-action btn-secondary">
                             📍 地圖
                         </a>
-                        <a href="https://www.google.com/maps/dir/?api=1&origin=Leonardo+Boutique+Hotel+Paris+Opera&destination=${encodeURIComponent(data.location)}" 
-                           target="_blank" class="btn-action btn-primary" onclick="event.stopPropagation()">
+                        <a href="https://www.google.com/maps/dir/?api=1&origin=Leonardo+Boutique+Hotel+Paris+Opera&destination=${encodeURIComponent(data.location)}"
+                           target="_blank" class="btn-action btn-primary">
                             🚗 導航
                         </a>
                     </div>
@@ -968,36 +1050,19 @@
             return card;
         }
 
-        // Modal 函數
-        function showModal(data) {
-            document.getElementById('modalTitle').textContent = data.category + ':' + data.title;
-            document.getElementById('modalTime').textContent = data.time;
-            document.getElementById('modalLocation').textContent = data.location;
-            document.getElementById('modalDescription').textContent = data.description;
-            document.getElementById('modalImage').style.backgroundImage = `url('${data.image}')`;
+        // 切換詳細資訊顯示
+        function toggleDetails(cardId) {
+            const details = document.getElementById(cardId);
+            const icon = document.getElementById(cardId + '-icon');
 
-            const hoursHtml = data.hours.map(h => `<div>${h}</div>`).join('');
-            document.getElementById('modalHours').innerHTML = hoursHtml;
-
-            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.location)}`;
-            const navUrl = `https://www.google.com/maps/dir/?api=1&origin=Leonardo+Boutique+Hotel+Paris+Opera&destination=${encodeURIComponent(data.location)}`;
-
-            document.getElementById('modalMapLink').href = mapUrl;
-            document.getElementById('modalNavLink').href = navUrl;
-
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            if (details.classList.contains('expanded')) {
+                details.classList.remove('expanded');
+                icon.textContent = '▼';
+            } else {
+                details.classList.add('expanded');
+                icon.textContent = '▲';
+            }
         }
-
-        function closeModal() {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // 點擊背景關閉
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
 
         // 效能優化: Passive 事件監聽
         document.addEventListener('touchstart', () => { }, { passive: true });

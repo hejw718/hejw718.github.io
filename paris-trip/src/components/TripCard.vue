@@ -23,7 +23,7 @@ function toggleDetails() {
         <div class="card-title">{{ data.title }}</div>
         <div class="card-time">⏰ {{ data.time }}</div>
       </div>
-      <div class="card-description">{{ data.description }}</div>
+      <div class="card-description" v-html="data.description"></div>
       <button class="btn-expand" @click="toggleDetails">
         <span>{{ expanded ? '▲' : '▼' }}</span> 查看詳細資訊
       </button>

@@ -12,27 +12,27 @@ const currentPage = ref('itinerary') // 'itinerary' or 'todos'
 // 根據當前日期智能判斷應該顯示哪一天
 function getInitialDay() {
   const today = new Date()
-  const tripStart = new Date('2026-02-14') // Day 0
-  const tripEnd = new Date('2026-02-22') // Day 6
+  const tripStart = new Date('2026-02-14') // Day 1
+  const tripEnd = new Date('2026-02-21') // Day 8
   
-  // 如果還沒到旅行日期,顯示 Day 0
+  // 如果還沒到旅行日期,顯示 Day 1
   if (today < tripStart) {
-    return 0
+    return 1
   }
   
-  // 如果已經過了旅行日期,顯示 Day 6
+  // 如果已經過了旅行日期,顯示 Day 8
   if (today > tripEnd) {
-    return 6
+    return 8
   }
   
-  // 在旅行期間,計算是第幾天
+  // 在旅行期間,計算是第幾天 (從 Day 1 開始)
   const diffTime = today - tripStart
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  return Math.min(diffDays, 6)
+  return Math.min(diffDays + 1, 8)
 }
 
 const currentDay = ref(getInitialDay())
-const days = [0, 1, 2, 3, 4, 5, 6]
+const days = [1, 2, 3, 4, 5, 6, 7, 8]
 const contentRef = ref(null)
 const tabRefs = ref([])
 const weatherLoading = ref(true)
@@ -88,13 +88,14 @@ function switchDay(day, event) {
 
 function getDayDate(day) {
   const dates = {
-    0: '2/14 週六',
-    1: '2/15 週日',
-    2: '2/16 週一',
-    3: '2/17 週二',
-    4: '2/18 週三',
-    5: '2/19 週四',
-    6: '2/20 週五'
+    1: '2/14 週六',
+    2: '2/15 週日',
+    3: '2/16 週一',
+    4: '2/17 週二',
+    5: '2/18 週三',
+    6: '2/19 週四',
+    7: '2/20 週五',
+    8: '2/21 週六'
   }
   return dates[day]
 }
@@ -103,8 +104,8 @@ function getDayDate(day) {
 <template>
   <header class="app-header">
     <div class="header-content">
-      <h1 class="header-title">🇫🇷 巴黎五天四夜</h1>
-      <p class="header-subtitle">2026/2/15 (日) - 2/19 (四)</p>
+      <h1 class="header-title">🇫🇷 巴黎七天六夜</h1>
+      <p class="header-subtitle">2026/2/14 (六) - 2/21 (六)</p>
       
       <div class="page-nav">
         <button 
