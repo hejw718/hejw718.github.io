@@ -755,6 +755,8 @@ function clearAll() {
   .rate-input {
     flex: 1;
     min-width: 60px;
+    font-size: 16px; /* 防止 iOS 自動縮放 */
+    padding: 4px 8px;
   }
 
   .add-form-section {
@@ -777,13 +779,13 @@ function clearAll() {
   }
 
   .form-input {
-    padding: 7px 9px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 16px; /* 防止 iOS 自動縮放 */
   }
 
   .twd-display {
-    padding: 7px 9px;
-    font-size: 15px;
+    padding: 6px 8px;
+    font-size: 16px;
   }
 
   .submit-btn {

@@ -657,10 +657,117 @@ export const itineraryData = {
         ]
     },
     7: {
-        // Day 7 的行程資訊未在 CSV 或 JS 中詳細提供，暫時留空。
-        title: 'Day 7 | 凡爾賽宮、艾菲爾鐵塔與百貨 (2/20)',
+        title: 'Day 7 | 凡爾賽宮、艾菲爾鐵塔 (2/20)',
         weather: null,
-        items: []
+        items: [
+            {
+                type: 'transit',
+                mode: 'TRANSIT',
+                origin: 'Leonardo Boutique Hotel Paris Opera',
+                destination: 'Château de Versailles',
+                icon: '🚈',
+                duration: '約 60 分鐘',
+                route: '前往凡爾賽宮<br>搭乘 RER C 線至 Versailles Château Rive Gauche 站，步行 10 分鐘'
+            },
+            {
+                type: 'card',
+                category: '景點',
+                title: '凡爾賽宮 (Château de Versailles)',
+                time: '09:00 - 11:30',
+                description: '參觀鏡廳、國王/皇后寢宮。預約最早場，建議提早安檢。',
+                hours: ['09:00 - 17:30 (週一休)'],
+                location: 'Place d\'Armes, 78000 Versailles',
+                image: 'https://images.unsplash.com/photo-1545494097-1545e22ee88c?w=800'
+            },
+            {
+                type: 'card',
+                category: '景點',
+                title: '凡爾賽花園 (Gardens of Versailles)',
+                time: '11:30 - 13:00',
+                description: '漫步花園與運河。花園腹地大，可租高爾夫球車或搭小火車。',
+                hours: ['08:00 - 18:00'],
+                location: 'Gardens of Versailles',
+                image: 'https://images.unsplash.com/photo-1574092049969-e7722797e870?w=800' // 修正為花園或類似圖片
+            },
+            {
+                type: 'transit',
+                mode: 'TRANSIT',
+                origin: 'Château de Versailles',
+                destination: 'Le Bistrot des Fables',
+                icon: '🚈',
+                duration: '約 60-70 分鐘',
+                route: '返回巴黎市區<br>搭乘 RER C 線返回，轉乘地鐵至餐廳附近'
+            },
+            {
+                type: 'card',
+                category: '晚餐',
+                title: 'Le Bistrot des Fables',
+                time: '17:00 - 18:15',
+                description: '米其林推薦餐廳，建議提前訂位。',
+                hours: ['12:00–14:30, 19:00–22:30 (請確認營業時間)'],
+                location: '139 Rue Saint-Dominique, 75007 Paris',
+                image: 'https://images.unsplash.com/photo-1550966871-3ed3c47e2ce2?w=800'
+            },
+            {
+                type: 'card',
+                category: '拍照',
+                title: 'L\'Howea 花店 & 比爾阿克姆橋 (Pont de Bir-Hakeim)',
+                time: '19:00 - 19:30',
+                description: '巴黎最美花店與《全面啟動》電影場景橋樑拍照。',
+                hours: ['全天開放'],
+                location: 'Pont de Bir-Hakeim',
+                image: 'https://images.unsplash.com/photo-1471623320832-752e8bbf8413?w=800' // 使用巴黎街景
+            },
+            {
+                type: 'transit',
+                mode: 'WALKING',
+                origin: 'Pont de Bir-Hakeim',
+                destination: 'Champ de Mars',
+                icon: '🚶',
+                duration: '約 10 分鐘',
+                route: '步行前往戰神廣場'
+            },
+            {
+                type: 'card',
+                category: '景點/拍照',
+                title: '戰神廣場 (Champ de Mars)',
+                time: '19:30 - 20:30',
+                description: '拍攝艾菲爾鐵塔全景的最佳地點。',
+                hours: ['全天開放'],
+                location: 'Champ de Mars',
+                image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce7859?w=800'
+            },
+            {
+                type: 'card',
+                category: '景點',
+                title: '艾菲爾鐵塔 (Eiffel Tower)',
+                time: '20:30 - 21:30',
+                description: '近距離欣賞鐵塔，尋找最佳拍攝點。',
+                hours: ['09:30 - 22:45'],
+                location: 'Champ de Mars, 5 Av. Anatole France, 75007 Paris',
+                image: 'https://images.unsplash.com/photo-1543349689-9a4d426bee8e?w=800'
+            },
+            {
+                type: 'card',
+                category: '拍照/夜景',
+                title: '夏佑宮 (Palais de Chaillot)',
+                time: '21:30 - 21:50',
+                description: '與艾菲爾鐵塔對望的絕佳觀景平台，適合拍點燈夜景。',
+                hours: ['全天開放'],
+                location: 'Place du Trocadéro',
+                image: 'https://images.unsplash.com/photo-1549479366-c956c38722b5?w=800' // 暫用通用圖
+            },
+            {
+                type: 'card',
+                category: '宵夜',
+                title: 'La Villa',
+                time: '22:00 - 23:00',
+                description: '享受巴黎夜晚的隨性自在，酒吧/宵夜。',
+                hours: ['請依現場營業時間為準'],
+                location: 'La Villa Paris',
+                image: 'https://images.unsplash.com/photo-1577782390886-07469a4c14c5?w=800'
+            }
+        ]
     },
     8: {
         title: 'Day 8 | 返回台灣 (2/21 - 2/22)',
