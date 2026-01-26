@@ -15,6 +15,25 @@ const newItem = ref({
   image: "",
 });
 
+const EXCHANGE_RATE = 35; // 1 EUR = 35 TWD
+
+function formatPrice(priceStr) {
+  if (!priceStr) return "";
+
+  // 嘗試提取數字
+  const matches = priceStr.match(/(\d+(\.\d+)?)/);
+  if (matches) {
+    const value = parseFloat(matches[1]);
+    const twd = Math.round(value * EXCHANGE_RATE);
+
+    // 如果原本字串不包含 NT$ 或 TWD，則幫忙加上
+    if (!priceStr.includes("NT") && !priceStr.includes("台幣")) {
+      return `${priceStr} (約 NT$${twd})`;
+    }
+  }
+  return priceStr;
+}
+
 const categories = computed(() => {
   // 深拷貝原始資料
   const combined = JSON.parse(JSON.stringify(souvenirData.categories));
@@ -139,12 +158,67 @@ function saveEdit(itemIdx) {
 function saveUserSouvenirs() {
   localStorage.setItem("userSouvenirs", JSON.stringify(userSouvenirs.value));
 }
+
+function handleImageUpload(event, isEdit = false) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // 壓縮圖片
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const MAX_WIDTH = 600;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+      if (isEdit) {
+        editForm.value.image = compressedBase64;
+      } else {
+        newItem.value.image = compressedBase64;
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function triggerFileInput(inputId) {
+  document.getElementById(inputId).click();
+}
 </script>
 
 <template>
   <div class="souvenir-page">
     <div class="quick-add-container">
       <div class="quick-add-bar">
+        <div class="qa-image-picker" @click="triggerFileInput('qa-file-input')">
+          <div
+            v-if="newItem.image"
+            class="qa-preview"
+            :style="{ backgroundImage: `url(${newItem.image})` }"
+          ></div>
+          <span v-else class="qa-camera-icon">📷</span>
+          <input
+            id="qa-file-input"
+            type="file"
+            accept="image/*"
+            class="hidden-file-input"
+            @change="handleImageUpload($event, false)"
+          />
+        </div>
         <input
           v-model="newItem.name"
           type="text"
@@ -154,7 +228,7 @@ function saveUserSouvenirs() {
         <input
           v-model="newItem.price"
           type="text"
-          placeholder="價錢"
+          placeholder="價錢 (€)"
           class="qa-input-price"
         />
         <select v-model="newItem.categoryName" class="qa-select-cat">
@@ -221,11 +295,26 @@ function saveUserSouvenirs() {
                     class="edit-input-name"
                     placeholder="名稱"
                   />
-                  <input
-                    v-model="editForm.price"
-                    class="edit-input-price"
-                    placeholder="價格"
-                  />
+                  <div class="edit-price-row">
+                    <input
+                      v-model="editForm.price"
+                      class="edit-input-price"
+                      placeholder="價格"
+                    />
+                    <button
+                      class="edit-img-btn"
+                      @click="triggerFileInput('edit-file-input-' + item.id)"
+                    >
+                      📷
+                    </button>
+                    <input
+                      :id="'edit-file-input-' + item.id"
+                      type="file"
+                      accept="image/*"
+                      class="hidden-file-input"
+                      @change="handleImageUpload($event, true)"
+                    />
+                  </div>
                   <div class="edit-actions">
                     <button class="save-edit-btn" @click="saveEdit()">
                       ✅
@@ -268,7 +357,7 @@ function saveUserSouvenirs() {
 
                 <div v-if="item.price" class="detail-row">
                   <span class="detail-icon">💰</span>
-                  <span class="detail-text">{{ item.price }}</span>
+                  <span class="detail-text">{{ formatPrice(item.price) }}</span>
                 </div>
                 <div v-if="item.where" class="detail-row">
                   <span class="detail-icon">📍</span>
@@ -548,18 +637,18 @@ function saveUserSouvenirs() {
 
 .edit-input-name {
   width: 100%;
-  padding: 6px 10px;
+  padding: 10px 12px;
   border: 1px solid #4f46e5;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 16px; /* 防止 iOS 縮放 */
 }
 
 .edit-input-price {
-  width: 100%;
-  padding: 6px 10px;
+  flex: 1;
+  padding: 10px 12px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 16px; /* 防止 iOS 縮放 */
 }
 
 .edit-actions {
@@ -608,38 +697,67 @@ function saveUserSouvenirs() {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
+}
+
+.qa-image-picker {
+  width: 40px;
+  height: 40px;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.qa-preview {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.qa-camera-icon {
+  font-size: 20px;
+}
+
+.hidden-file-input {
+  display: none;
 }
 
 .qa-input-name {
   flex: 2;
   min-width: 120px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px; /* 防止 iOS 縮放 */
 }
 
 .qa-input-price {
-  flex: 1;
-  min-width: 80px;
-  padding: 8px 12px;
+  width: 80px;
+  padding: 10px 8px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px; /* 防止 iOS 縮放 */
 }
 
 .qa-select-cat {
   flex: 1;
   min-width: 100px;
-  padding: 8px;
+  padding: 10px 8px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px; /* 防止 iOS 縮放 */
   background: white;
 }
 
 .qa-btn {
-  padding: 8px 16px;
+  padding: 10px 16px;
   background: #4f46e5;
   color: white;
   border: none;
@@ -647,11 +765,26 @@ function saveUserSouvenirs() {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  font-size: 16px;
 }
 
 .qa-btn:disabled {
   background: #94a3b8;
   cursor: not-allowed;
+}
+
+.edit-price-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.edit-img-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .delete-btn {
