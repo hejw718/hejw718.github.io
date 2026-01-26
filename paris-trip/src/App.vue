@@ -14,6 +14,7 @@ import PackingListPage from "./components/PackingListPage.vue";
 import { trips } from "./data/trips";
 import { currentTrip, switchTrip } from "./utils/tripStore";
 
+const showTripModal = ref(false);
 const currentPage = ref("itinerary"); // 'itinerary', 'todos', or 'disneyland'
 
 // 從 URL hash 讀取初始頁面
@@ -290,17 +291,42 @@ function getDayDate(day) {
       </h1>
       <p class="header-subtitle">{{ currentTrip.dates }}</p>
 
-      <!-- 旅程切換器 -->
-      <div class="trip-switcher">
-        <select
-          v-model="currentTrip.id"
-          @change="switchTrip($event.target.value)"
-          class="trip-select"
-        >
-          <option v-for="trip in trips" :key="trip.id" :value="trip.id">
-            {{ trip.name }}
-          </option>
-        </select>
+      <!-- Trip Switcher Button -->
+      <button class="trip-switch-btn" @click="showTripModal = true">
+        ✈️ 切換旅程
+      </button>
+
+      <!-- Trip Selection Modal -->
+      <div
+        v-if="showTripModal"
+        class="trip-modal-overlay"
+        @click.self="showTripModal = false"
+      >
+        <div class="trip-modal">
+          <h3>選擇您的旅程</h3>
+          <div class="trip-list">
+            <button
+              v-for="trip in trips"
+              :key="trip.id"
+              class="trip-option"
+              :class="{ active: currentTrip.id === trip.id }"
+              @click="
+                switchTrip(trip.id);
+                showTripModal = false;
+              "
+            >
+              <span class="t-flag">{{ trip.flag }}</span>
+              <div class="t-info">
+                <span class="t-name">{{ trip.name }}</span>
+                <span class="t-date">{{ trip.dates }}</span>
+              </div>
+              <span v-if="currentTrip.id === trip.id" class="t-check">✓</span>
+            </button>
+          </div>
+          <button class="modal-close" @click="showTripModal = false">
+            取消
+          </button>
+        </div>
       </div>
 
       <!-- 全域搜尋框 -->
@@ -444,18 +470,30 @@ function getDayDate(day) {
     </div>
 
     <!-- 待辦事項頁面 -->
-    <TodoPage v-else-if="currentPage === 'todos'" />
+    <TodoPage v-else-if="currentPage === 'todos'" :key="currentTrip.id" />
 
     <!-- 迪士尼攻略頁面 -->
-    <DisneylandPage v-else-if="currentPage === 'disneyland'" />
+    <DisneylandPage
+      v-else-if="currentPage === 'disneyland'"
+      :key="currentTrip.id"
+    />
 
     <!-- 伴手禮推薦頁面 -->
-    <SouvenirPage v-else-if="currentPage === 'souvenirs'" />
+    <SouvenirPage
+      v-else-if="currentPage === 'souvenirs'"
+      :key="currentTrip.id"
+    />
 
     <!-- 比價頁面 -->
-    <PriceComparisonPage v-else-if="currentPage === 'price-comparison'" />
+    <PriceComparisonPage
+      v-else-if="currentPage === 'price-comparison'"
+      :key="currentTrip.id"
+    />
 
     <!-- 行李清單頁面 -->
-    <PackingListPage v-else-if="currentPage === 'packing'" />
+    <PackingListPage
+      v-else-if="currentPage === 'packing'"
+      :key="currentTrip.id"
+    />
   </main>
 </template>
