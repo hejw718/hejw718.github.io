@@ -114,6 +114,28 @@ function deleteSouvenir(item) {
   saveUserSouvenirs();
 }
 
+const editingId = ref(null);
+const editForm = ref({ name: "", price: "" });
+
+function startEdit(item) {
+  editingId.value = item.id;
+  editForm.value = { name: item.name, price: item.price };
+}
+
+function cancelEdit() {
+  editingId.value = null;
+}
+
+function saveEdit(itemIdx) {
+  const item = userSouvenirs.value.find((s) => s.id === editingId.value);
+  if (item) {
+    item.name = editForm.value.name;
+    item.price = editForm.value.price;
+    saveUserSouvenirs();
+  }
+  editingId.value = null;
+}
+
 function saveUserSouvenirs() {
   localStorage.setItem("userSouvenirs", JSON.stringify(userSouvenirs.value));
 }
@@ -193,18 +215,48 @@ function saveUserSouvenirs() {
 
             <div class="card-content">
               <div class="card-header-row">
-                <div class="title-group">
-                  <h3 class="item-name">{{ item.name }}</h3>
-                  <p class="item-name-en">{{ item.nameEn }}</p>
-                </div>
-                <label class="checkbox-container">
+                <div v-if="editingId === item.id" class="edit-mode-inputs">
                   <input
-                    type="checkbox"
-                    :checked="isPurchased(idx, itemIdx)"
-                    @change="togglePurchased(idx, itemIdx)"
+                    v-model="editForm.name"
+                    class="edit-input-name"
+                    placeholder="名稱"
                   />
-                  <span class="checkmark"></span>
-                </label>
+                  <input
+                    v-model="editForm.price"
+                    class="edit-input-price"
+                    placeholder="價格"
+                  />
+                  <div class="edit-actions">
+                    <button class="save-edit-btn" @click="saveEdit()">
+                      ✅
+                    </button>
+                    <button class="cancel-edit-btn" @click="cancelEdit">
+                      ❌
+                    </button>
+                  </div>
+                </div>
+                <template v-else>
+                  <div class="title-group">
+                    <h3 class="item-name">
+                      {{ item.name }}
+                      <span
+                        v-if="item.isCustom"
+                        class="edit-icon-btn"
+                        @click.stop="startEdit(item)"
+                        >✏️</span
+                      >
+                    </h3>
+                    <p class="item-name-en">{{ item.nameEn }}</p>
+                  </div>
+                  <label class="checkbox-container">
+                    <input
+                      type="checkbox"
+                      :checked="isPurchased(idx, itemIdx)"
+                      @change="togglePurchased(idx, itemIdx)"
+                    />
+                    <span class="checkmark"></span>
+                  </label>
+                </template>
               </div>
 
               <button class="expand-btn" @click="toggleExpand(idx, itemIdx)">
@@ -484,6 +536,62 @@ function saveUserSouvenirs() {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+/* 編輯模式樣式 */
+.edit-mode-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.edit-input-name {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #4f46e5;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.edit-input-price {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.edit-actions button:hover {
+  background: #f1f5f9;
+}
+
+.edit-icon-btn {
+  font-size: 12px;
+  margin-left: 6px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.edit-icon-btn:hover {
+  opacity: 1;
 }
 
 /* Quick Add Bar 樣式 */
