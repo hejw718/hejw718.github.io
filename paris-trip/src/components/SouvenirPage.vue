@@ -943,44 +943,76 @@ function triggerFileInput(inputId) {
 
 /* Mobile Adjustments */
 @media (max-width: 640px) {
+  .souvenir-hero {
+    padding: 40px 20px 60px;
+  }
+
   .hero-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
+
+  .smart-add-wrapper {
+    position: relative; /* 改為相對定位，避免遮擋內容 */
+    bottom: auto;
+    left: 0;
+    right: 0;
+    margin-top: -30px;
+    padding: 0 15px;
+  }
+
   .smart-add-bar {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
     padding: 16px;
+    gap: 12px;
   }
-  .name-group {
-    order: 1;
-    width: calc(100% - 60px);
-  }
+
   .image-uploader {
-    order: 0;
-  }
-  .price-group {
-    order: 2;
-    width: 45%;
-    border: 1px solid #f1f5f9;
-    border-radius: 12px;
-    border-left: 1px solid #f1f5f9;
-    margin-top: 10px;
-  }
-  .smart-select {
-    order: 3;
-    width: 45%;
-    margin-top: 10px;
-    border: 1px solid #f1f5f9;
-    border-radius: 12px;
-    padding: 10px;
-  }
-  .add-confirm-btn {
-    order: 4;
     width: 100%;
-    margin-top: 10px;
+    height: 120px;
+    border-radius: 16px;
+  }
+
+  .price-group {
+    max-width: none;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 2px 12px;
+  }
+
+  .smart-select {
+    width: 100%;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .add-confirm-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .categories-container {
+    margin-top: 30px; /* 因為 smart-add-wrapper 改為 relative，這裡間距要調小 */
+  }
+
+  .souvenir-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .premium-card {
-    grid-template-columns: 1fr;
+    border-radius: 20px;
+  }
+
+  .card-visual {
+    height: 180px;
+  }
+
+  .cat-name {
+    font-size: 1.25rem;
   }
 }
 
