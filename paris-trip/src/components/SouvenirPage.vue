@@ -121,11 +121,9 @@ function saveUserSouvenirs() {
 
 <template>
   <div class="souvenir-page">
-    <div class="actions-bar">
-      <button class="add-btn" @click="showAddModal = true">
-        ➕ 新增自定義伴手禮
-      </button>
-    </div>
+    <button class="add-fab" @click="showAddModal = true" title="新增伴手禮">
+      <span>+</span>
+    </button>
 
     <!-- 新增對話框 -->
     <div
@@ -529,47 +527,58 @@ function saveUserSouvenirs() {
   transform: rotate(45deg);
 }
 
-/* 新增功能樣式 */
-.actions-bar {
-  margin-bottom: 24px;
-  display: flex;
-  justify-content: center;
-}
-
-.add-btn {
-  padding: 12px 24px;
+/* 新增功能樣式 - FAB */
+.add-fab {
+  position: fixed;
+  bottom: 30px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 700;
+  border-radius: 50%;
+  font-size: 32px;
+  font-weight: 300;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.5);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
 }
 
-.add-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+.add-fab span {
+  margin-top: -4px;
+}
+
+.add-fab:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 6px 24px rgba(79, 70, 229, 0.6);
+}
+
+.add-fab:active {
+  transform: scale(0.95);
 }
 
 .delete-btn {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
+  top: 8px;
+  left: 8px;
   background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
+  z-index: 2;
 }
 
 .delete-btn:hover {
@@ -578,96 +587,144 @@ function saveUserSouvenirs() {
   transform: scale(1.1);
 }
 
-/* Modal 樣式 */
+/* Modal 樣式 - Premium Look */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
   padding: 20px;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
   background: white;
   padding: 30px;
-  border-radius: 20px;
+  border-radius: 24px;
   width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
+  max-width: 480px;
+  max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
 }
 
 .modal-content h3 {
   margin-top: 0;
-  margin-bottom: 20px;
-  color: var(--text-primary);
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  text-align: center;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  padding: 12px 16px;
+  border: 2px solid #f1f5f9;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  color: #1e293b;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 .form-group textarea {
-  height: 80px;
+  height: 100px;
   resize: vertical;
 }
 
 .modal-actions {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 32px;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding-top: 10px;
 }
 
 .modal-actions button {
   flex: 1;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .cancel-btn {
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #4b5563;
+  background: #f1f5f9;
+  border: none;
+  color: #64748b;
+}
+
+.cancel-btn:hover {
+  background: #e2e8f0;
+  color: #475569;
 }
 
 .submit-btn {
-  background: #4f46e5;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   border: none;
   color: white;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
 }
 
 .submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 /* 響應式設計 */
