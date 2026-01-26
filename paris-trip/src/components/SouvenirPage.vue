@@ -15,7 +15,7 @@ const newItem = ref({
   image: "",
 });
 
-const EXCHANGE_RATE = 35; // 1 EUR = 35 TWD
+const EXCHANGE_RATE = 37; // 1 EUR = 35 TWD
 
 function formatPrice(priceStr) {
   if (!priceStr) return "";
@@ -202,172 +202,210 @@ function triggerFileInput(inputId) {
 
 <template>
   <div class="souvenir-page">
-    <div class="quick-add-container">
-      <div class="quick-add-bar">
-        <div class="qa-image-picker" @click="triggerFileInput('qa-file-input')">
-          <div
-            v-if="newItem.image"
-            class="qa-preview"
-            :style="{ backgroundImage: `url(${newItem.image})` }"
-          ></div>
-          <span v-else class="qa-camera-icon">📷</span>
-          <input
-            id="qa-file-input"
-            type="file"
-            accept="image/*"
-            class="hidden-file-input"
-            @change="handleImageUpload($event, false)"
-          />
-        </div>
-        <input
-          v-model="newItem.name"
-          type="text"
-          placeholder="名稱 (必填)"
-          class="qa-input-name"
-        />
-        <input
-          v-model="newItem.price"
-          type="text"
-          placeholder="價錢 (€)"
-          class="qa-input-price"
-        />
-        <select v-model="newItem.categoryName" class="qa-select-cat">
-          <option
-            v-for="cat in souvenirData.categories"
-            :key="cat.name"
-            :value="cat.name"
-          >
-            {{ cat.name }}
-          </option>
-          <option value="其他">其他</option>
-        </select>
-        <button
-          class="qa-btn"
-          @click="addNewSouvenir"
-          :disabled="!newItem.name"
-        >
-          新增
-        </button>
+    <!-- Hero Section -->
+    <header class="souvenir-hero">
+      <div class="hero-content">
+        <h1 class="hero-title">🎁 伴手禮指南</h1>
+        <p class="hero-subtitle">收藏您的購物清單，從這裡開始紀錄巴黎足跡</p>
       </div>
-    </div>
 
-    <div class="categories">
+      <!-- Smart Add Bar -->
+      <div class="smart-add-wrapper">
+        <div class="smart-add-bar">
+          <div
+            class="image-uploader"
+            @click="triggerFileInput('qa-file-input')"
+          >
+            <div
+              v-if="newItem.image"
+              class="preview-mini"
+              :style="{ backgroundImage: `url(${newItem.image})` }"
+            ></div>
+            <span v-else class="cam-icon">📷</span>
+            <input
+              id="qa-file-input"
+              type="file"
+              accept="image/*"
+              class="hidden-input"
+              @change="handleImageUpload($event, false)"
+            />
+          </div>
+
+          <div class="input-group name-group">
+            <input
+              v-model="newItem.name"
+              type="text"
+              placeholder="想要買什麼？"
+              class="smart-input"
+            />
+          </div>
+
+          <div class="input-group price-group">
+            <span class="currency-tag">€</span>
+            <input
+              v-model="newItem.price"
+              type="text"
+              placeholder="價錢"
+              class="smart-input price-input"
+            />
+          </div>
+
+          <select v-model="newItem.categoryName" class="smart-select">
+            <option
+              v-for="cat in souvenirData.categories"
+              :key="cat.name"
+              :value="cat.name"
+            >
+              {{ cat.name }}
+            </option>
+            <option value="其他">其他</option>
+          </select>
+
+          <button
+            class="add-confirm-btn"
+            @click="addNewSouvenir"
+            :disabled="!newItem.name"
+          >
+            新增
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="categories-container">
       <section
         v-for="(category, idx) in categories"
         :key="idx"
-        class="category-section"
+        class="category-block"
       >
-        <h2 class="category-title">
-          <span class="category-icon">{{ category.icon }}</span>
-          {{ category.name }}
-        </h2>
+        <div class="category-header">
+          <span class="cat-icon-box">{{ category.icon }}</span>
+          <h2 class="cat-name">{{ category.name }}</h2>
+          <div class="cat-line"></div>
+        </div>
 
-        <div class="items-grid">
+        <div class="souvenir-grid">
           <div
             v-for="(item, itemIdx) in category.items"
             :key="itemIdx"
-            class="souvenir-card"
-            :class="{ purchased: isPurchased(idx, itemIdx) }"
+            class="premium-card"
+            :class="{
+              'is-purchased': isPurchased(idx, itemIdx),
+              'is-editing': editingId === item.id,
+            }"
           >
-            <div
-              class="card-image"
-              :style="{
-                backgroundImage: `url(${item.image || 'https://via.placeholder.com/300x200?text=No+Image'})`,
-              }"
-            >
-              <div v-if="isPurchased(idx, itemIdx)" class="purchased-badge">
-                ✓ 已購買
+            <!-- Card Image Area -->
+            <div class="card-visual">
+              <div
+                class="main-image"
+                :style="{
+                  backgroundImage: `url(${item.image || 'https://via.placeholder.com/400x300?text=No+Photo'})`,
+                }"
+              ></div>
+              <div v-if="item.price" class="price-medal">
+                <span class="medal-label">€</span>
+                <span class="medal-value">{{ item.price }}</span>
               </div>
               <button
-                v-if="item.isCustom"
-                class="delete-btn"
+                v-if="item.isCustom && editingId !== item.id"
+                class="trash-btn"
                 @click.stop="deleteSouvenir(item)"
               >
                 🗑️
               </button>
+              <div v-if="isPurchased(idx, itemIdx)" class="bought-overlay">
+                <span class="check-mark">✓ 已收入口袋</span>
+              </div>
             </div>
 
-            <div class="card-content">
-              <div class="card-header-row">
-                <div v-if="editingId === item.id" class="edit-mode-inputs">
+            <!-- Card Info Area -->
+            <div class="card-info">
+              <!-- Edit Mode -->
+              <div v-if="editingId === item.id" class="edit-zone">
+                <input
+                  v-model="editForm.name"
+                  class="edit-field name-field"
+                  placeholder="名稱"
+                />
+                <div class="edit-row">
                   <input
-                    v-model="editForm.name"
-                    class="edit-input-name"
-                    placeholder="名稱"
+                    v-model="editForm.price"
+                    class="edit-field price-field"
+                    placeholder="價格"
                   />
-                  <div class="edit-price-row">
-                    <input
-                      v-model="editForm.price"
-                      class="edit-input-price"
-                      placeholder="價格"
-                    />
-                    <button
-                      class="edit-img-btn"
-                      @click="triggerFileInput('edit-file-input-' + item.id)"
-                    >
-                      📷
-                    </button>
-                    <input
-                      :id="'edit-file-input-' + item.id"
-                      type="file"
-                      accept="image/*"
-                      class="hidden-file-input"
-                      @change="handleImageUpload($event, true)"
-                    />
-                  </div>
-                  <div class="edit-actions">
-                    <button class="save-edit-btn" @click="saveEdit()">
-                      ✅
-                    </button>
-                    <button class="cancel-edit-btn" @click="cancelEdit">
-                      ❌
-                    </button>
-                  </div>
+                  <button
+                    class="edit-cam-btn"
+                    @click="triggerFileInput('edit-file-' + item.id)"
+                  >
+                    📷
+                  </button>
+                  <input
+                    :id="'edit-file-' + item.id"
+                    type="file"
+                    accept="image/*"
+                    class="hidden-input"
+                    @change="handleImageUpload($event, true)"
+                  />
                 </div>
-                <template v-else>
-                  <div class="title-group">
-                    <h3 class="item-name">
+                <div class="edit-btns">
+                  <button class="save-btn" @click="saveEdit()">儲存</button>
+                  <button class="cancel-btn" @click="cancelEdit">取消</button>
+                </div>
+              </div>
+
+              <!-- View Mode -->
+              <template v-else>
+                <div class="card-top">
+                  <div class="text-wrap">
+                    <h3 class="name-zh">
                       {{ item.name }}
                       <span
                         v-if="item.isCustom"
-                        class="edit-icon-btn"
+                        class="pen-btn"
                         @click.stop="startEdit(item)"
                         >✏️</span
                       >
                     </h3>
-                    <p class="item-name-en">{{ item.nameEn }}</p>
+                    <p class="name-en">
+                      {{ item.nameEn || "Collection Item" }}
+                    </p>
                   </div>
-                  <label class="checkbox-container">
+                  <label class="premium-check">
                     <input
                       type="checkbox"
                       :checked="isPurchased(idx, itemIdx)"
                       @change="togglePurchased(idx, itemIdx)"
                     />
-                    <span class="checkmark"></span>
+                    <span class="check-box-ui"></span>
                   </label>
-                </template>
-              </div>
-
-              <button class="expand-btn" @click="toggleExpand(idx, itemIdx)">
-                {{ isExpanded(idx, itemIdx) ? "收起詳情 ▲" : "查看詳情 ▼" }}
-              </button>
-
-              <div v-show="isExpanded(idx, itemIdx)" class="item-details">
-                <p class="item-description">{{ item.description }}</p>
-
-                <div v-if="item.price" class="detail-row">
-                  <span class="detail-icon">💰</span>
-                  <span class="detail-text">{{ formatPrice(item.price) }}</span>
                 </div>
-                <div v-if="item.where" class="detail-row">
-                  <span class="detail-icon">📍</span>
-                  <span class="detail-text">{{ item.where }}</span>
+
+                <div class="conversion-box" v-if="item.price">
+                  <span class="conv-label">預估金額</span>
+                  <span class="conv-value">{{ formatPrice(item.price) }}</span>
                 </div>
-                <div v-if="item.tips" class="detail-row tips">
-                  <span class="detail-icon">💡</span>
-                  <span class="detail-text">{{ item.tips }}</span>
-                </div>
-              </div>
+
+                <button
+                  class="details-toggle"
+                  @click="toggleExpand(idx, itemIdx)"
+                >
+                  {{ isExpanded(idx, itemIdx) ? "簡單顯示" : "詳細資訊" }}
+                </button>
+
+                <transition name="slice">
+                  <div v-show="isExpanded(idx, itemIdx)" class="extra-info">
+                    <div class="info-piece">
+                      <span class="p-icon">�</span>
+                      <p>{{ item.where || "--" }}</p>
+                    </div>
+                    <div v-if="item.tips" class="info-piece tip-piece">
+                      <span class="p-icon">�</span>
+                      <p>{{ item.tips }}</p>
+                    </div>
+                    <p class="desc-text">{{ item.description }}</p>
+                  </div>
+                </transition>
+              </template>
             </div>
           </div>
         </div>
@@ -377,440 +415,586 @@ function triggerFileInput(inputId) {
 </template>
 
 <style scoped>
+/* 全域變數 */
+:host {
+  --paris-blue: #1e293b;
+  --paris-accent: #6366f1;
+  --paris-gold: #f59e0b;
+  --paris-bg: #f8fafc;
+  --card-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --card-radius: 24px;
+}
+
 .souvenir-page {
-  padding: 20px;
-  max-width: 1200px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* Hero Section */
+.souvenir-hero {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  padding: 60px 24px 80px;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  max-width: 500px;
   margin: 0 auto;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 40px;
-  padding: 30px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  color: white;
+/* Smart Add Bar */
+.smart-add-wrapper {
+  position: absolute;
+  bottom: -32px;
+  left: 20px;
+  right: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  z-index: 10;
 }
 
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.page-subtitle {
-  font-size: 1rem;
-  opacity: 0.9;
-}
-
-.category-section {
-  margin-bottom: 50px;
-}
-
-.category-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 24px;
-  color: var(--text-primary);
+.smart-add-bar {
+  background: white;
+  padding: 10px;
+  border-radius: 20px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.category-icon {
-  font-size: 1.8rem;
-}
-
-.items-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.souvenir-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.souvenir-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.card-image {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background-size: cover;
-  background-position: center;
-  border-radius: 12px 12px 0 0;
-  position: relative;
-}
-
-.purchased-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
-}
-
-.souvenir-card.purchased {
-  opacity: 0.7;
-}
-
-.souvenir-card.purchased .card-image {
-  filter: grayscale(30%);
-}
-
-.card-content {
-  padding: 14px;
-}
-
-.card-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.title-group {
-  flex: 1;
-  min-width: 0;
-}
-
-.item-name {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 2px 0;
-  line-height: 1.3;
-}
-
-.item-name-en {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  font-style: italic;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.expand-btn {
-  width: 100%;
-  padding: 6px;
-  background: #f9fafb;
-  color: #6b7280;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 10px;
-}
-
-.expand-btn:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.expand-btn:active {
-  transform: scale(0.98);
-}
-
-.item-details {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 10px;
-  border-top: 1px solid #f3f4f6;
-}
-
-.item-description {
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-.detail-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 0.85rem;
-}
-
-.detail-row.tips {
-  background: #fef3c7;
-  padding: 8px;
-  border-radius: 6px;
-  border-left: 3px solid #f59e0b;
-}
-
-.detail-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-  line-height: 1.5;
-}
-
-.detail-text {
-  color: var(--text-primary);
-  line-height: 1.5;
-  flex: 1;
-}
-
-.detail-row.tips .detail-text {
-  color: #92400e;
-  font-weight: 500;
-}
-
-/* 自訂勾選框 */
-.checkbox-container {
-  display: block;
-  position: relative;
-  cursor: pointer;
-  user-select: none;
-  flex-shrink: 0;
-}
-
-.checkbox-container input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.checkmark {
-  display: block;
-  height: 22px;
-  width: 22px;
-  background-color: #f3f4f6;
-  border: 2px solid #d1d5db;
-  border-radius: 5px;
-  transition: all 0.2s;
-}
-
-.checkbox-container:hover .checkmark {
-  background-color: #e5e7eb;
-}
-
-.checkbox-container input:checked ~ .checkmark {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-color: #10b981;
-}
-
-.checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
-}
-
-.checkbox-container input:checked ~ .checkmark:after {
-  display: block;
-}
-
-.checkbox-container .checkmark:after {
-  left: 7px;
-  top: 3px;
-  width: 5px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-/* 編輯模式樣式 */
-.edit-mode-inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.edit-input-name {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #4f46e5;
-  border-radius: 8px;
-  font-size: 16px; /* 防止 iOS 縮放 */
-}
-
-.edit-input-price {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 16px; /* 防止 iOS 縮放 */
-}
-
-.edit-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.edit-actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-
-.edit-actions button:hover {
-  background: #f1f5f9;
-}
-
-.edit-icon-btn {
-  font-size: 12px;
-  margin-left: 6px;
-  cursor: pointer;
-  opacity: 0.5;
-  transition: opacity 0.2s;
-}
-
-.edit-icon-btn:hover {
-  opacity: 1;
-}
-
-/* Quick Add Bar 樣式 */
-.quick-add-container {
-  background: white;
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 20px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.quick-add-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.qa-image-picker {
-  width: 40px;
-  height: 40px;
+.image-uploader {
+  width: 44px;
+  height: 44px;
   background: #f1f5f9;
-  border: 1px dashed #cbd5e1;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  overflow: hidden;
   flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: all 0.2s;
 }
 
-.qa-preview {
+.image-uploader:hover {
+  border-color: #6366f1;
+}
+
+.preview-mini {
   width: 100%;
   height: 100%;
   background-size: cover;
   background-position: center;
 }
 
-.qa-camera-icon {
-  font-size: 20px;
-}
-
-.hidden-file-input {
+.hidden-input {
   display: none;
 }
 
-.qa-input-name {
-  flex: 2;
-  min-width: 120px;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 16px; /* 防止 iOS 縮放 */
-}
-
-.qa-input-price {
-  width: 80px;
-  padding: 10px 8px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 16px; /* 防止 iOS 縮放 */
-}
-
-.qa-select-cat {
+.input-group {
   flex: 1;
-  min-width: 100px;
-  padding: 10px 8px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 16px; /* 防止 iOS 縮放 */
-  background: white;
+  position: relative;
 }
 
-.qa-btn {
-  padding: 10px 16px;
-  background: #4f46e5;
+.smart-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 4px;
+  font-size: 16px; /* 防止 iOS 縮放 */
+  outline: none;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.price-group {
+  display: flex;
+  align-items: center;
+  max-width: 100px;
+  border-right: 1px solid #f1f5f9;
+  border-left: 1px solid #f1f5f9;
+  padding: 0 10px;
+}
+
+.currency-tag {
+  color: #94a3b8;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.smart-select {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #64748b;
+  padding: 0 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+.add-confirm-btn {
+  padding: 10px 20px;
+  background: #6366f1;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 14px;
+  font-weight: 700;
   cursor: pointer;
-  white-space: nowrap;
-  font-size: 16px;
+  transition: all 0.2s;
 }
 
-.qa-btn:disabled {
-  background: #94a3b8;
+.add-confirm-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.add-confirm-btn:disabled {
+  background: #cbd5e1;
   cursor: not-allowed;
 }
 
-.edit-price-row {
+/* Categories Area */
+.categories-container {
+  max-width: 1100px;
+  margin: 60px auto 0;
+  padding: 0 20px;
+}
+
+.category-block {
+  margin-bottom: 60px;
+}
+
+.category-header {
   display: flex;
-  gap: 6px;
   align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
 }
 
-.edit-img-btn {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  padding: 4px 8px;
-  border-radius: 6px;
-  cursor: pointer;
+.cat-icon-box {
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.delete-btn {
+.cat-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.cat-line {
+  height: 2px;
+  background: #e2e8f0;
+  flex: 1;
+}
+
+/* Premium Cards */
+.souvenir-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.premium-card {
+  background: white;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+}
+
+.card-visual {
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+}
+
+.main-image {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.6s ease;
+}
+
+.premium-card:hover .main-image {
+  transform: scale(1.05);
+}
+
+.price-medal {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  background: rgba(255, 255, 255, 0.9);
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px 14px;
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.medal-label {
+  color: #6366f1;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.medal-value {
+  color: #1e293b;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.trash-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.8);
   border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.8rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   z-index: 2;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
 }
 
-@media (max-width: 600px) {
-  .quick-add-bar {
-    flex-direction: column;
+.premium-card:hover .trash-btn {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.bought-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(99, 102, 241, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.check-mark {
+  background: white;
+  color: #6366f1;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-info {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.name-zh {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.pen-btn {
+  font-size: 14px;
+  margin-left: 8px;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+.premium-card:hover .pen-btn {
+  opacity: 0.7;
+}
+.pen-btn:hover {
+  opacity: 1 !important;
+  color: #6366f1;
+}
+
+.name-en {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 4px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Premium Checkbox */
+.premium-check {
+  cursor: pointer;
+}
+
+.premium-check input {
+  display: none;
+}
+
+.check-box-ui {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  display: block;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.premium-check input:checked + .check-box-ui {
+  background: #6366f1;
+  border-color: #6366f1;
+}
+
+.check-box-ui::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  color: white;
+  font-weight: 800;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.premium-check input:checked + .check-box-ui::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.conversion-box {
+  background: #f1f5f9;
+  padding: 12px 16px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.conv-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.conv-value {
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.details-toggle {
+  width: 100%;
+  background: none;
+  border: 1px solid #f1f5f9;
+  padding: 8px;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: auto;
+}
+
+.details-toggle:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.extra-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #f1f5f9;
+}
+
+.info-piece {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.tip-piece {
+  background: #fefce8;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+}
+
+.desc-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #64748b;
+  margin-top: 12px;
+}
+
+/* Edit Mode Styles */
+.edit-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-field {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 16px;
+  background: #f8fafc;
+}
+
+.edit-field:focus {
+  border-color: #6366f1;
+  outline: none;
+  background: white;
+}
+
+.edit-row {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-cam-btn {
+  width: 44px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.edit-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.edit-btns button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: #6366f1;
+  color: white;
+  border: none;
+}
+.cancel-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 2rem;
   }
-  .qa-btn {
+  .smart-add-bar {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  .name-group {
+    order: 1;
+    width: calc(100% - 60px);
+  }
+  .image-uploader {
+    order: 0;
+  }
+  .price-group {
+    order: 2;
+    width: 45%;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    border-left: 1px solid #f1f5f9;
+    margin-top: 10px;
+  }
+  .smart-select {
+    order: 3;
+    width: 45%;
+    margin-top: 10px;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 10px;
+  }
+  .add-confirm-btn {
+    order: 4;
     width: 100%;
+    margin-top: 10px;
+  }
+
+  .premium-card {
+    grid-template-columns: 1fr;
   }
 }
+
+/* Animations */
+.slice-enter-active,
+.slice-leave-active {
+  transition: all 0.3s ease;
+  max-height: 200px;
+}
+.slice-enter-from,
+.slice-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+}
 </style>
+```
