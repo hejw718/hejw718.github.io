@@ -14,6 +14,7 @@ const newItem = ref({
   where: "",
   tips: "",
   image: "",
+  url: "",
 });
 
 function formatPrice(priceStr) {
@@ -91,6 +92,7 @@ function addNewSouvenir() {
     where: "",
     tips: "",
     image: "",
+    url: "",
   };
   showAddModal.value = false;
 }
@@ -102,11 +104,16 @@ function deleteSouvenir(item) {
 }
 
 const editingId = ref(null);
-const editForm = ref({ name: "", price: "", image: "" });
+const editForm = ref({ name: "", price: "", image: "", url: "" });
 
 function startEdit(item) {
   editingId.value = item.id;
-  editForm.value = { name: item.name, price: item.price, image: item.image };
+  editForm.value = {
+    name: item.name,
+    price: item.price,
+    image: item.image,
+    url: item.url || "",
+  };
 }
 
 function cancelEdit() {
@@ -119,6 +126,7 @@ function saveEdit() {
     item.name = editForm.value.name;
     item.price = editForm.value.price;
     item.image = editForm.value.image;
+    item.url = editForm.value.url;
     saveUserSouvenirs();
   }
   editingId.value = null;
@@ -200,6 +208,12 @@ function triggerFileInput(inputId) {
               placeholder="€ 價錢"
               class="v2-input price-in"
             />
+            <input
+              v-model="newItem.url"
+              type="text"
+              placeholder="🔗 官網/連結"
+              class="v2-input url-in"
+            />
             <select v-model="newItem.categoryName" class="v2-input cat-in">
               <option
                 v-for="cat in souvenirData.categories"
@@ -265,6 +279,11 @@ function triggerFileInput(inputId) {
                     class="v2-edit-input"
                     placeholder="名稱"
                   />
+                  <input
+                    v-model="editForm.url"
+                    class="v2-edit-input"
+                    placeholder="🔗 連結 (URL)"
+                  />
                   <div class="v2-edit-row">
                     <input
                       v-model="editForm.price"
@@ -329,6 +348,13 @@ function triggerFileInput(inputId) {
                   <span v-if="item.where" class="v2-tag"
                     >📍 {{ item.where }}</span
                   >
+                  <a
+                    v-if="item.url"
+                    :href="item.url"
+                    target="_blank"
+                    class="v2-tag link-tag"
+                    >🔗 查看連結</a
+                  >
                   <span v-if="item.tips" class="v2-tag tip"
                     >💡 {{ item.tips }}</span
                   >
@@ -387,8 +413,16 @@ function triggerFileInput(inputId) {
 .v2-add-inputs {
   display: grid;
   grid-template-columns: 50px 1fr;
-  grid-template-areas: "img name" "img price" "img cat";
+  grid-template-areas:
+    "img name"
+    "img price"
+    "img url"
+    "img cat";
   gap: 8px;
+}
+
+.url-in {
+  grid-area: url;
 }
 .v2-img-pick {
   grid-area: img;
@@ -623,6 +657,13 @@ function triggerFileInput(inputId) {
   background: #fffbeb;
   border-color: #fef3c7;
   color: #b45309;
+}
+.v2-tag.link-tag {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0369a1;
+  text-decoration: none;
+  font-weight: 600;
 }
 .is-purchased .v2-post-visual {
   filter: grayscale(0.6);
