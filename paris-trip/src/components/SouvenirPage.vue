@@ -155,7 +155,7 @@ function handleImageUpload(event, isEdit = false) {
       canvas.height = height;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, width, height);
-      const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+      const compressedBase64 = canvas.toDataURL("image/jpeg", 0.6);
       if (isEdit) editForm.value.image = compressedBase64;
       else newItem.value.image = compressedBase64;
     };
