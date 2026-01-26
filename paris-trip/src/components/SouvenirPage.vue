@@ -121,106 +121,39 @@ function saveUserSouvenirs() {
 
 <template>
   <div class="souvenir-page">
-    <div class="souvenir-header-section">
-      <div class="header-info">
-        <h2 class="page-main-title">🎁 必買伴手禮清單</h2>
-        <p class="page-subtitle">收藏您的購物清單，不再錯過精彩好物</p>
+    <div class="quick-add-container">
+      <div class="quick-add-bar">
+        <input
+          v-model="newItem.name"
+          type="text"
+          placeholder="名稱 (必填)"
+          class="qa-input-name"
+        />
+        <input
+          v-model="newItem.price"
+          type="text"
+          placeholder="價錢"
+          class="qa-input-price"
+        />
+        <select v-model="newItem.categoryName" class="qa-select-cat">
+          <option
+            v-for="cat in souvenirData.categories"
+            :key="cat.name"
+            :value="cat.name"
+          >
+            {{ cat.name }}
+          </option>
+          <option value="其他">其他</option>
+        </select>
+        <button
+          class="qa-btn"
+          @click="addNewSouvenir"
+          :disabled="!newItem.name"
+        >
+          新增
+        </button>
       </div>
-      <button class="add-new-btn" @click="showAddModal = true">
-        <span class="btn-icon">+</span> 新增伴手禮
-      </button>
     </div>
-
-    <!-- 新增對話框 (使用 Teleport 到 body 確保不被 header 擋住) -->
-    <Teleport to="body">
-      <div
-        v-if="showAddModal"
-        class="modal-overlay"
-        @click.self="showAddModal = false"
-      >
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3>新增伴手禮</h3>
-            <button class="close-x" @click="showAddModal = false">×</button>
-          </div>
-
-          <div class="modal-body">
-            <div class="form-row">
-              <div class="form-group flex-2">
-                <label>名稱*</label>
-                <input
-                  v-model="newItem.name"
-                  placeholder="例如: 聖米歇爾山餅乾"
-                />
-              </div>
-              <div class="form-group flex-1">
-                <label>類別*</label>
-                <select v-model="newItem.categoryName">
-                  <option
-                    v-for="cat in souvenirData.categories"
-                    :key="cat.name"
-                    :value="cat.name"
-                  >
-                    {{ cat.name }}
-                  </option>
-                  <option value="其他">其他</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>英文名稱</label>
-              <input
-                v-model="newItem.nameEn"
-                placeholder="例如: St. Michel Biscuits"
-              />
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>價格</label>
-                <input v-model="newItem.price" placeholder="例如: 約 €4-6" />
-              </div>
-              <div class="form-group">
-                <label>購買地點</label>
-                <input v-model="newItem.where" placeholder="例如: 各大超市" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>描述</label>
-              <textarea
-                v-model="newItem.description"
-                placeholder="簡單介紹一下這個伴手禮..."
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>提示 (Tips)</label>
-              <input v-model="newItem.tips" placeholder="小撇步或注意事項" />
-            </div>
-
-            <div class="form-group">
-              <label>圖片網址</label>
-              <input v-model="newItem.image" placeholder="https://..." />
-            </div>
-          </div>
-
-          <div class="modal-actions">
-            <button class="cancel-btn" @click="showAddModal = false">
-              取消
-            </button>
-            <button
-              class="submit-btn"
-              :disabled="!newItem.name"
-              @click="addNewSouvenir()"
-            >
-              確認新增
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
 
     <div class="categories">
       <section
@@ -553,252 +486,90 @@ function saveUserSouvenirs() {
   transform: rotate(45deg);
 }
 
-/* 新增功能樣式 - Header Section */
-.souvenir-header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
+/* Quick Add Bar 樣式 */
+.quick-add-container {
   background: white;
-  border-radius: 20px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f1f5f9;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.page-main-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #1e293b;
-  margin: 0 0 4px 0;
-}
-
-.page-subtitle {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin: 0;
-}
-
-.add-new-btn {
+.quick-add-bar {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.qa-input-name {
+  flex: 2;
+  min-width: 120px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.qa-input-price {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.qa-select-cat {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+}
+
+.qa-btn {
+  padding: 8px 16px;
+  background: #4f46e5;
   color: white;
   border: none;
-  border-radius: 12px;
-  font-weight: 700;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  white-space: nowrap;
 }
 
-.add-new-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
-}
-
-.btn-icon {
-  font-size: 1.2rem;
-  line-height: 1;
+.qa-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
 }
 
 .delete-btn {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  top: 6px;
+  left: 6px;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s;
+  font-size: 0.8rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   z-index: 2;
 }
 
-.delete-btn:hover {
-  background: #fee2e2;
-  color: #ef4444;
-  transform: scale(1.1);
-}
-
-/* Modal 樣式 - 全螢幕設計修復 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999; /* 絕對最高 */
-  padding: 20px;
-  backdrop-filter: blur(10px);
-  animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.modal-content {
-  background: white;
-  border-radius: 24px;
-  width: 100%;
-  max-width: 550px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-}
-
-.modal-header {
-  padding: 24px 30px;
-  border-bottom: 1px solid #f1f5f9;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #1e293b;
-}
-
-.close-x {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #94a3b8;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.modal-body {
-  padding: 30px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.form-row {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.flex-2 {
-  flex: 2;
-}
-.flex-1 {
-  flex: 1;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #f1f5f9;
-  border-radius: 12px;
-  font-size: 1rem;
-  background: #f8fafc;
-  transition: all 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #6366f1;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-}
-
-.modal-actions {
-  padding: 20px 30px;
-  background: #f8fafc;
-  display: flex;
-  gap: 12px;
-}
-
-.modal-actions button {
-  flex: 1;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.cancel-btn {
-  background: white;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-}
-
-.submit-btn {
-  background: #4f46e5;
-  color: white;
-  border: none;
-}
-
-.submit-btn:disabled {
-  opacity: 0.5;
-  filter: grayscale(1);
-}
-
-/* 響應式小螢幕調整 */
 @media (max-width: 600px) {
-  .souvenir-header-section {
+  .quick-add-bar {
     flex-direction: column;
-    text-align: center;
-    gap: 20px;
   }
-
-  .add-new-btn {
+  .qa-btn {
     width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .souvenir-page {
-    padding: 15px;
-  }
-
-  .items-grid {
-    gap: 15px;
   }
 }
 </style>
