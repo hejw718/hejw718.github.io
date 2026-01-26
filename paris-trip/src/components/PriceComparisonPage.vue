@@ -1,103 +1,98 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { exchangeRate as defaultRate } from '../data/priceComparison'
+import { ref, computed, onMounted } from "vue";
+import { globalExchangeRate } from "../utils/exchangeRate";
 
-// 匯率設定
-const exchangeRate = ref(defaultRate.eurToTwd)
+// 匯率設定使用全域共享狀態
+const exchangeRate = globalExchangeRate;
 
 // 表單資料
 const formData = ref({
-  store: '',
-  item: '',
-  eurAmount: ''
-})
+  store: "",
+  item: "",
+  eurAmount: "",
+});
 
 // 比價列表
-const comparisonList = ref([])
+const comparisonList = ref([]);
 
 // 從 localStorage 載入資料
 onMounted(() => {
-  const savedList = localStorage.getItem('paris-price-comparison')
-  const savedRate = localStorage.getItem('paris-exchange-rate')
-  
+  const savedList = localStorage.getItem("paris-price-comparison");
+
   if (savedList) {
     try {
-      comparisonList.value = JSON.parse(savedList)
+      comparisonList.value = JSON.parse(savedList);
     } catch (e) {
-      console.error('Failed to load comparison list', e)
+      console.error("Failed to load comparison list", e);
     }
   }
-  
-  if (savedRate) {
-    exchangeRate.value = parseFloat(savedRate)
-  }
-})
+});
 
 // 計算台幣金額
 const twdAmount = computed(() => {
-  const eur = parseFloat(formData.value.eurAmount)
-  if (isNaN(eur) || eur <= 0) return 0
-  return Math.round(eur * exchangeRate.value)
-})
+  const eur = parseFloat(formData.value.eurAmount);
+  if (isNaN(eur) || eur <= 0) return 0;
+  return Math.round(eur * exchangeRate.value);
+});
 
 // 以品項分組的資料
 const groupedByItem = computed(() => {
-  const groups = {}
-  
-  comparisonList.value.forEach(item => {
+  const groups = {};
+
+  comparisonList.value.forEach((item) => {
     if (!groups[item.item]) {
-      groups[item.item] = []
+      groups[item.item] = [];
     }
-    groups[item.item].push(item)
-  })
-  
+    groups[item.item].push(item);
+  });
+
   // 為每個品項找出最便宜的商店
-  Object.keys(groups).forEach(itemName => {
-    const stores = groups[itemName]
-    const minPrice = Math.min(...stores.map(s => s.eurAmount))
-    stores.forEach(store => {
-      store.isCheapest = store.eurAmount === minPrice
-    })
+  Object.keys(groups).forEach((itemName) => {
+    const stores = groups[itemName];
+    const minPrice = Math.min(...stores.map((s) => s.eurAmount));
+    stores.forEach((store) => {
+      store.isCheapest = store.eurAmount === minPrice;
+    });
     // 按價格排序（便宜到貴）
-    groups[itemName].sort((a, b) => a.eurAmount - b.eurAmount)
-  })
-  
-  return groups
-})
+    groups[itemName].sort((a, b) => a.eurAmount - b.eurAmount);
+  });
+
+  return groups;
+});
 
 // 品項列表（按字母排序）
 const itemNames = computed(() => {
-  return Object.keys(groupedByItem.value).sort()
-})
+  return Object.keys(groupedByItem.value).sort();
+});
 
 // 所有已存在的品項名稱（用於下拉選單）
 const existingItemNames = computed(() => {
-  const names = new Set()
-  comparisonList.value.forEach(item => {
-    names.add(item.item)
-  })
-  return Array.from(names).sort()
-})
+  const names = new Set();
+  comparisonList.value.forEach((item) => {
+    names.add(item.item);
+  });
+  return Array.from(names).sort();
+});
 
 // 新增比價項目
 function addComparison() {
-  const eur = parseFloat(formData.value.eurAmount)
-  
+  const eur = parseFloat(formData.value.eurAmount);
+
   if (!formData.value.store.trim()) {
-    alert('請輸入商店名稱')
-    return
+    alert("請輸入商店名稱");
+    return;
   }
-  
+
   if (!formData.value.item.trim()) {
-    alert('請輸入品項名稱')
-    return
+    alert("請輸入品項名稱");
+    return;
   }
-  
+
   if (isNaN(eur) || eur <= 0) {
-    alert('請輸入有效的歐元金額')
-    return
+    alert("請輸入有效的歐元金額");
+    return;
   }
-  
+
   const newItem = {
     id: Date.now(),
     store: formData.value.store.trim(),
@@ -105,63 +100,69 @@ function addComparison() {
     eurAmount: eur,
     twdAmount: Math.round(eur * exchangeRate.value),
     exchangeRate: exchangeRate.value,
-    createdAt: new Date().toISOString()
-  }
-  
-  comparisonList.value.push(newItem)
-  saveToLocalStorage()
-  
+    createdAt: new Date().toISOString(),
+  };
+
+  comparisonList.value.push(newItem);
+  saveToLocalStorage();
+
   // 清空表單（保留品項名稱，方便連續輸入同品項不同商店）
   formData.value = {
-    store: '',
+    store: "",
     item: formData.value.item,
-    eurAmount: ''
-  }
+    eurAmount: "",
+  };
 }
 
 // 刪除項目
 function deleteItem(id) {
-  if (confirm('確定要刪除這個比價項目嗎？')) {
-    comparisonList.value = comparisonList.value.filter(item => item.id !== id)
-    saveToLocalStorage()
+  if (confirm("確定要刪除這個比價項目嗎？")) {
+    comparisonList.value = comparisonList.value.filter(
+      (item) => item.id !== id,
+    );
+    saveToLocalStorage();
   }
 }
 
 // 刪除整個品項
 function deleteItemGroup(itemName) {
   if (confirm(`確定要刪除「${itemName}」的所有比價資料嗎？`)) {
-    comparisonList.value = comparisonList.value.filter(item => item.item !== itemName)
-    saveToLocalStorage()
+    comparisonList.value = comparisonList.value.filter(
+      (item) => item.item !== itemName,
+    );
+    saveToLocalStorage();
   }
 }
 
 // 儲存到 localStorage
 function saveToLocalStorage() {
-  localStorage.setItem('paris-price-comparison', JSON.stringify(comparisonList.value))
+  localStorage.setItem(
+    "paris-price-comparison",
+    JSON.stringify(comparisonList.value),
+  );
 }
 
-// 更新匯率
+// 更新匯率 (現在直接修改 reactive 的 globalExchangeRate 就會生效並存入 localStorage)
 function updateExchangeRate() {
   if (exchangeRate.value <= 0) {
-    alert('請輸入有效的匯率')
-    return
+    alert("請輸入有效的匯率");
+    return;
   }
-  localStorage.setItem('paris-exchange-rate', exchangeRate.value.toString())
-  
   // 重新計算所有項目的台幣金額
-  comparisonList.value = comparisonList.value.map(item => ({
+  comparisonList.value = comparisonList.value.map((item) => ({
     ...item,
     twdAmount: Math.round(item.eurAmount * exchangeRate.value),
-    exchangeRate: exchangeRate.value
-  }))
-  saveToLocalStorage()
+    exchangeRate: exchangeRate.value,
+  }));
+  saveToLocalStorage();
+  alert("匯率已更新，全站同步生效！");
 }
 
 // 清空所有資料
 function clearAll() {
-  if (confirm('確定要清空所有比價資料嗎？此操作無法復原！')) {
-    comparisonList.value = []
-    saveToLocalStorage()
+  if (confirm("確定要清空所有比價資料嗎？此操作無法復原！")) {
+    comparisonList.value = [];
+    saveToLocalStorage();
   }
 }
 </script>
@@ -177,16 +178,18 @@ function clearAll() {
         </div>
         <div class="rate-control">
           <div class="rate-input-wrapper">
-            <input 
+            <input
               id="exchange-rate"
-              v-model.number="exchangeRate" 
-              type="number" 
+              v-model.number="exchangeRate"
+              type="number"
               step="0.1"
               min="0"
               class="rate-input"
             />
             <span class="rate-label">EUR → TWD</span>
-            <button @click="updateExchangeRate" class="update-rate-btn">更新</button>
+            <button @click="updateExchangeRate" class="update-rate-btn">
+              更新
+            </button>
           </div>
           <p class="rate-hint">1 歐元 = {{ exchangeRate }} 台幣</p>
         </div>
@@ -200,28 +203,32 @@ function clearAll() {
         <div class="form-row">
           <div class="form-group">
             <label for="store">商店名稱</label>
-            <input 
+            <input
               id="store"
-              v-model="formData.store" 
-              type="text" 
+              v-model="formData.store"
+              type="text"
               placeholder="例如：Galeries Lafayette"
               class="form-input"
             />
           </div>
-          
+
           <div class="form-group">
             <label for="item">品項名稱</label>
-            <input 
+            <input
               id="item"
-              v-model="formData.item" 
-              type="text" 
+              v-model="formData.item"
+              type="text"
               placeholder="例如：Longchamp 包包"
               class="form-input"
               list="item-suggestions"
               autocomplete="off"
             />
             <datalist id="item-suggestions">
-              <option v-for="name in existingItemNames" :key="name" :value="name"></option>
+              <option
+                v-for="name in existingItemNames"
+                :key="name"
+                :value="name"
+              ></option>
             </datalist>
           </div>
         </div>
@@ -229,17 +236,17 @@ function clearAll() {
         <div class="form-row">
           <div class="form-group">
             <label for="eur-amount">歐元金額 (€)</label>
-            <input 
+            <input
               id="eur-amount"
-              v-model="formData.eurAmount" 
-              type="number" 
+              v-model="formData.eurAmount"
+              type="number"
               step="0.01"
               min="0"
               placeholder="0.00"
               class="form-input"
             />
           </div>
-          
+
           <div class="form-group">
             <label>台幣金額 (NT$)</label>
             <div class="twd-display">
@@ -255,9 +262,15 @@ function clearAll() {
     <!-- 比價列表 -->
     <div class="comparison-list-section">
       <div class="list-header">
-        <h3 class="section-title">📊 比價列表 ({{ itemNames.length }} 個品項)</h3>
+        <h3 class="section-title">
+          📊 比價列表 ({{ itemNames.length }} 個品項)
+        </h3>
         <div class="list-actions">
-          <button v-if="comparisonList.length > 0" @click="clearAll" class="clear-all-btn">
+          <button
+            v-if="comparisonList.length > 0"
+            @click="clearAll"
+            class="clear-all-btn"
+          >
             清空全部
           </button>
         </div>
@@ -270,22 +283,22 @@ function clearAll() {
 
       <!-- 以品項分組顯示 -->
       <div v-else class="item-groups">
-        <div 
-          v-for="itemName in itemNames" 
-          :key="itemName" 
-          class="item-group"
-        >
+        <div v-for="itemName in itemNames" :key="itemName" class="item-group">
           <div class="item-group-header">
             <h4 class="item-group-title">{{ itemName }}</h4>
-            <button @click="deleteItemGroup(itemName)" class="delete-group-btn" title="刪除此品項">
+            <button
+              @click="deleteItemGroup(itemName)"
+              class="delete-group-btn"
+              title="刪除此品項"
+            >
               🗑️ 刪除
             </button>
           </div>
 
           <div class="stores-comparison">
-            <div 
-              v-for="store in groupedByItem[itemName]" 
-              :key="store.id" 
+            <div
+              v-for="store in groupedByItem[itemName]"
+              :key="store.id"
               class="store-card"
               :class="{ cheapest: store.isCheapest }"
             >
@@ -297,22 +310,35 @@ function clearAll() {
               <div class="store-card-content">
                 <div class="store-header">
                   <div class="store-name">🏪 {{ store.store }}</div>
-                  <button @click="deleteItem(store.id)" class="delete-btn-small" title="刪除">
+                  <button
+                    @click="deleteItem(store.id)"
+                    class="delete-btn-small"
+                    title="刪除"
+                  >
                     ✕
                   </button>
                 </div>
-                
+
                 <div class="price-display">
                   <div class="price-row-main">
-                    <span class="price-value eur">€ {{ store.eurAmount.toFixed(2) }}</span>
+                    <span class="price-value eur"
+                      >€ {{ store.eurAmount.toFixed(2) }}</span
+                    >
                     <span class="price-arrow">→</span>
-                    <span class="price-value twd">NT$ {{ store.twdAmount.toLocaleString() }}</span>
+                    <span class="price-value twd"
+                      >NT$ {{ store.twdAmount.toLocaleString() }}</span
+                    >
                   </div>
                 </div>
-                
+
                 <div class="store-footer">
                   <span class="rate-info">匯率: {{ store.exchangeRate }}</span>
-                  <span class="date-info">{{ new Date(store.createdAt).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }) }}</span>
+                  <span class="date-info">{{
+                    new Date(store.createdAt).toLocaleDateString("zh-TW", {
+                      month: "numeric",
+                      day: "numeric",
+                    })
+                  }}</span>
                 </div>
               </div>
             </div>

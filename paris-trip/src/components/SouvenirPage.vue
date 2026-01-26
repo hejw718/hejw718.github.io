@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { souvenirData } from "../data/souvenirs";
+import { globalExchangeRate } from "../utils/exchangeRate";
 
 const userSouvenirs = ref([]);
 const showAddModal = ref(false);
@@ -15,14 +16,12 @@ const newItem = ref({
   image: "",
 });
 
-const EXCHANGE_RATE = 37;
-
 function formatPrice(priceStr) {
   if (!priceStr) return "";
   const matches = priceStr.match(/(\d+(\.\d+)?)/);
   if (matches) {
     const value = parseFloat(matches[1]);
-    const twd = Math.round(value * EXCHANGE_RATE);
+    const twd = Math.round(value * globalExchangeRate.value);
     if (!priceStr.includes("NT") && !priceStr.includes("台幣")) {
       return `${priceStr} (約 NT$${twd})`;
     }
