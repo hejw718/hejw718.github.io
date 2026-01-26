@@ -11,6 +11,8 @@ import DisneylandPage from "./components/DisneylandPage.vue";
 import SouvenirPage from "./components/SouvenirPage.vue";
 import PriceComparisonPage from "./components/PriceComparisonPage.vue";
 import PackingListPage from "./components/PackingListPage.vue";
+import { trips } from "./data/trips";
+import { currentTrip, switchTrip } from "./utils/tripStore";
 
 const currentPage = ref("itinerary"); // 'itinerary', 'todos', or 'disneyland'
 
@@ -283,8 +285,23 @@ function getDayDate(day) {
 <template>
   <header class="app-header">
     <div class="header-content">
-      <h1 class="header-title">🇫🇷 巴黎七天六夜</h1>
-      <p class="header-subtitle">2026/2/14 (六) - 2/21 (六)</p>
+      <h1 class="header-title">
+        {{ currentTrip.flag }} {{ currentTrip.fullName }}
+      </h1>
+      <p class="header-subtitle">{{ currentTrip.dates }}</p>
+
+      <!-- 旅程切換器 -->
+      <div class="trip-switcher">
+        <select
+          v-model="currentTrip.id"
+          @change="switchTrip($event.target.value)"
+          class="trip-select"
+        >
+          <option v-for="trip in trips" :key="trip.id" :value="trip.id">
+            {{ trip.name }}
+          </option>
+        </select>
+      </div>
 
       <!-- 全域搜尋框 -->
       <div class="search-container">

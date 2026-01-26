@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { souvenirData } from "../data/souvenirs";
 import { globalExchangeRate } from "../utils/exchangeRate";
+import { currentTrip, getTripStorageKey } from "../utils/tripStore";
 
 const userSouvenirs = ref([]);
 const showAddModal = ref(false);
@@ -46,12 +47,26 @@ const categories = computed(() => {
 const expandedItems = ref(new Set());
 const purchasedItems = ref(new Set());
 
-onMounted(() => {
-  const savedPurchased = localStorage.getItem("purchasedSouvenirs");
+// 載入當前旅程的資料
+function loadTripData() {
+  const savedPurchased = localStorage.getItem(
+    getTripStorageKey("purchasedSouvenirs"),
+  );
   if (savedPurchased)
     purchasedItems.value = new Set(JSON.parse(savedPurchased));
-  const savedUserSouvenirs = localStorage.getItem("userSouvenirs");
+  const savedUserSouvenirs = localStorage.getItem(
+    getTripStorageKey("userSouvenirs"),
+  );
   if (savedUserSouvenirs) userSouvenirs.value = JSON.parse(savedUserSouvenirs);
+}
+
+onMounted(() => {
+  loadTripData();
+});
+
+// 監聽旅程切換
+watch(currentTrip, () => {
+  loadTripData();
 });
 
 function toggleExpand(categoryIdx, itemIdx) {
@@ -69,7 +84,7 @@ function togglePurchased(categoryIdx, itemIdx) {
   if (purchasedItems.value.has(key)) purchasedItems.value.delete(key);
   else purchasedItems.value.add(key);
   localStorage.setItem(
-    "purchasedSouvenirs",
+    getTripStorageKey("purchasedSouvenirs"),
     JSON.stringify([...purchasedItems.value]),
   );
 }
@@ -133,7 +148,10 @@ function saveEdit() {
 }
 
 function saveUserSouvenirs() {
-  localStorage.setItem("userSouvenirs", JSON.stringify(userSouvenirs.value));
+  localStorage.setItem(
+    getTripStorageKey("userSouvenirs"),
+    JSON.stringify(userSouvenirs.value),
+  );
 }
 
 function handleImageUpload(event, isEdit = false) {

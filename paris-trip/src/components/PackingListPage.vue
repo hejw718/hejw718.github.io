@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { currentTrip, getTripStorageKey } from "../utils/tripStore";
 
-const STORAGE_KEY = "paris-packing-list";
+const getStorageKey = () => getTripStorageKey("packing-list");
 
 const categories = ref([
   {
@@ -9,41 +10,36 @@ const categories = ref([
     icon: "🛂",
     items: [
       { id: 1, name: "護照 (及其影本)", checked: false },
-      { id: 2, name: "機票 / 登機證", checked: false },
-      { id: 3, name: "保險單據", checked: false },
-      { id: 4, name: "飯店 / 活動 Voucher", checked: false },
-      { id: 5, name: "歐元現金 & 信用卡", checked: false },
+      { id: 2, name: "歐元現金 & 信用卡", checked: false },
     ],
   },
   {
     name: "電子產品",
     icon: "🔌",
     items: [
-      { id: 6, name: "歐標轉接頭 (兩圓頭)", checked: false },
-      { id: 7, name: "行動電源 & 充電線", checked: false },
-      { id: 8, name: "相機 & 記憶卡", checked: false },
-      { id: 9, name: "上網卡 / WiFi 機", checked: false },
+      { id: 3, name: "歐標轉接頭 (兩圓頭)", checked: false },
+      { id: 4, name: "行動電源 & 充電線", checked: false },
     ],
   },
   {
     name: "衣物鞋物",
     icon: "👕",
     items: [
-      { id: 10, name: "保暖外套 (防風防水佳)", checked: false },
-      { id: 11, name: "休閒走遠路鞋", checked: false },
-      { id: 12, name: "發熱衣 / 保暖內層", checked: false },
-      { id: 13, name: "睡衣", checked: false },
-      { id: 14, name: "內衣褲 & 襪子", checked: false },
+      { id: 5, name: "保暖外套 (防風防水佳)", checked: false },
+      { id: 6, name: "休閒走遠路鞋", checked: false },
+      { id: 7, name: "發熱衣 / 保暖內層", checked: false },
+      { id: 8, name: "睡衣", checked: false },
+      { id: 9, name: "內衣褲 & 襪子", checked: false },
     ],
   },
   {
     name: "衛生藥品",
     icon: "💊",
     items: [
-      { id: 15, name: "牙刷 / 牙膏 (歐洲部分旅館不提供)", checked: false },
-      { id: 16, name: "個人常備藥盒", checked: false },
-      { id: 17, name: "保養品 / 防曬", checked: false },
-      { id: 18, name: "摺疊傘 / 雨衣", checked: false },
+      { id: 10, name: "牙刷 / 牙膏 (歐洲部分旅館不提供)", checked: false },
+      { id: 11, name: "個人常備藥盒", checked: false },
+      { id: 12, name: "保養品 / 防曬", checked: false },
+      { id: 13, name: "摺疊傘 / 雨衣", checked: false },
     ],
   },
 ]);
@@ -52,9 +48,9 @@ const userItems = ref([]);
 const newItemName = ref("");
 const selectedCategory = ref("必備證件");
 
-// 從 localStorage 載入狀態
-onMounted(() => {
-  const saved = localStorage.getItem(STORAGE_KEY);
+// 載入當前旅程的資料
+function loadTripData() {
+  const saved = localStorage.getItem(getStorageKey());
   if (saved) {
     const { savedCategories, savedUserItems } = JSON.parse(saved);
     // 合併勾選狀態到結構中
@@ -71,11 +67,21 @@ onMounted(() => {
     }
     if (savedUserItems) userItems.value = savedUserItems;
   }
+}
+
+// 初始載入
+onMounted(() => {
+  loadTripData();
+});
+
+// 監聽旅程切換
+watch(currentTrip, () => {
+  loadTripData();
 });
 
 function saveToLocalStorage() {
   localStorage.setItem(
-    STORAGE_KEY,
+    getStorageKey(),
     JSON.stringify({
       savedCategories: categories.value,
       savedUserItems: userItems.value,
