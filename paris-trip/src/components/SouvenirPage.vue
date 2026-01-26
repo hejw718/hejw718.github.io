@@ -15,18 +15,14 @@ const newItem = ref({
   image: "",
 });
 
-const EXCHANGE_RATE = 37; // 1 EUR = 35 TWD
+const EXCHANGE_RATE = 37;
 
 function formatPrice(priceStr) {
   if (!priceStr) return "";
-
-  // 嘗試提取數字
   const matches = priceStr.match(/(\d+(\.\d+)?)/);
   if (matches) {
     const value = parseFloat(matches[1]);
     const twd = Math.round(value * EXCHANGE_RATE);
-
-    // 如果原本字串不包含 NT$ 或 TWD，則幫忙加上
     if (!priceStr.includes("NT") && !priceStr.includes("台幣")) {
       return `${priceStr} (約 NT$${twd})`;
     }
@@ -35,49 +31,32 @@ function formatPrice(priceStr) {
 }
 
 const categories = computed(() => {
-  // 深拷貝原始資料
   const combined = JSON.parse(JSON.stringify(souvenirData.categories));
-
-  // 將使用者新增的項目加入對應類別
   userSouvenirs.value.forEach((item) => {
     let category = combined.find((c) => c.name === item.categoryName);
     if (!category) {
-      category = {
-        name: item.categoryName,
-        icon: "🎁",
-        items: [],
-      };
+      category = { name: item.categoryName, icon: "🎁", items: [] };
       combined.push(category);
     }
     category.items.push({ ...item, isCustom: true });
   });
-
   return combined;
 });
 
 const expandedItems = ref(new Set());
 const purchasedItems = ref(new Set());
 
-// 從 localStorage 載入狀態
 onMounted(() => {
   const savedPurchased = localStorage.getItem("purchasedSouvenirs");
-  if (savedPurchased) {
-    purchasedItems.value = new Set(JSON.parse(savedPurchased));
-  }
-
+  if (savedPurchased) purchasedItems.value = new Set(JSON.parse(savedPurchased));
   const savedUserSouvenirs = localStorage.getItem("userSouvenirs");
-  if (savedUserSouvenirs) {
-    userSouvenirs.value = JSON.parse(savedUserSouvenirs);
-  }
+  if (savedUserSouvenirs) userSouvenirs.value = JSON.parse(savedUserSouvenirs);
 });
 
 function toggleExpand(categoryIdx, itemIdx) {
   const key = `${categoryIdx}-${itemIdx}`;
-  if (expandedItems.value.has(key)) {
-    expandedItems.value.delete(key);
-  } else {
-    expandedItems.value.add(key);
-  }
+  if (expandedItems.value.has(key)) expandedItems.value.delete(key);
+  else expandedItems.value.add(key);
 }
 
 function isExpanded(categoryIdx, itemIdx) {
@@ -86,16 +65,9 @@ function isExpanded(categoryIdx, itemIdx) {
 
 function togglePurchased(categoryIdx, itemIdx) {
   const key = `${categoryIdx}-${itemIdx}`;
-  if (purchasedItems.value.has(key)) {
-    purchasedItems.value.delete(key);
-  } else {
-    purchasedItems.value.add(key);
-  }
-  // 保存到 localStorage
-  localStorage.setItem(
-    "purchasedSouvenirs",
-    JSON.stringify([...purchasedItems.value]),
-  );
+  if (purchasedItems.value.has(key)) purchasedItems.value.delete(key);
+  else purchasedItems.value.add(key);
+  localStorage.setItem("purchasedSouvenirs", JSON.stringify([...purchasedItems.value]));
 }
 
 function isPurchased(categoryIdx, itemIdx) {
@@ -104,25 +76,12 @@ function isPurchased(categoryIdx, itemIdx) {
 
 function addNewSouvenir() {
   if (!newItem.value.name || !newItem.value.categoryName) return;
-
-  const itemToAdd = {
-    ...newItem.value,
-    id: Date.now(), // 用於刪除的唯一識別
-  };
-
+  const itemToAdd = { ...newItem.value, id: Date.now() };
   userSouvenirs.value.push(itemToAdd);
   saveUserSouvenirs();
-
-  // 重置表單
   newItem.value = {
     categoryName: souvenirData.categories[0].name,
-    name: "",
-    nameEn: "",
-    description: "",
-    price: "",
-    where: "",
-    tips: "",
-    image: "",
+    name: "", nameEn: "", description: "", price: "", where: "", tips: "", image: ""
   };
   showAddModal.value = false;
 }
@@ -134,22 +93,21 @@ function deleteSouvenir(item) {
 }
 
 const editingId = ref(null);
-const editForm = ref({ name: "", price: "" });
+const editForm = ref({ name: "", price: "", image: "" });
 
 function startEdit(item) {
   editingId.value = item.id;
-  editForm.value = { name: item.name, price: item.price };
+  editForm.value = { name: item.name, price: item.price, image: item.image };
 }
 
-function cancelEdit() {
-  editingId.value = null;
-}
+function cancelEdit() { editingId.value = null; }
 
-function saveEdit(itemIdx) {
+function saveEdit() {
   const item = userSouvenirs.value.find((s) => s.id === editingId.value);
   if (item) {
     item.name = editForm.value.name;
     item.price = editForm.value.price;
+    item.image = editForm.value.image;
     saveUserSouvenirs();
   }
   editingId.value = null;
@@ -162,33 +120,20 @@ function saveUserSouvenirs() {
 function handleImageUpload(event, isEdit = false) {
   const file = event.target.files[0];
   if (!file) return;
-
-  // 壓縮圖片
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const MAX_WIDTH = 600;
-      let width = img.width;
-      let height = img.height;
-
-      if (width > MAX_WIDTH) {
-        height *= MAX_WIDTH / width;
-        width = MAX_WIDTH;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
+      let width = img.width, height = img.height;
+      if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+      canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, width, height);
-
       const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
-      if (isEdit) {
-        editForm.value.image = compressedBase64;
-      } else {
-        newItem.value.image = compressedBase64;
-      }
+      if (isEdit) editForm.value.image = compressedBase64;
+      else newItem.value.image = compressedBase64;
     };
     img.src = e.target.result;
   };
@@ -201,832 +146,147 @@ function triggerFileInput(inputId) {
 </script>
 
 <template>
-  <div class="souvenir-page">
-    <!-- Hero Section -->
-    <header class="souvenir-hero">
-      <div class="hero-content">
-        <h1 class="hero-title">🎁 伴手禮指南</h1>
-        <p class="hero-subtitle">收藏您的購物清單，從這裡開始紀錄巴黎足跡</p>
+  <div class="souvenir-v2">
+    <div class="v2-header">
+      <div class="v2-header-top">
+        <h1 class="v2-title">Paris Souvenirs</h1>
+        <button class="v2-add-toggle" @click="showAddModal = !showAddModal">
+          {{ showAddModal ? '✕ 關閉' : '+ 新增' }}
+        </button>
       </div>
-
-      <!-- Smart Add Bar -->
-      <div class="smart-add-wrapper">
-        <div class="smart-add-bar">
-          <div
-            class="image-uploader"
-            @click="triggerFileInput('qa-file-input')"
-          >
-            <div
-              v-if="newItem.image"
-              class="preview-mini"
-              :style="{ backgroundImage: `url(${newItem.image})` }"
-            ></div>
-            <span v-else class="cam-icon">📷</span>
-            <input
-              id="qa-file-input"
-              type="file"
-              accept="image/*"
-              class="hidden-input"
-              @change="handleImageUpload($event, false)"
-            />
-          </div>
-
-          <div class="input-group name-group">
-            <input
-              v-model="newItem.name"
-              type="text"
-              placeholder="想要買什麼？"
-              class="smart-input"
-            />
-          </div>
-
-          <div class="input-group price-group">
-            <span class="currency-tag">€</span>
-            <input
-              v-model="newItem.price"
-              type="text"
-              placeholder="價錢"
-              class="smart-input price-input"
-            />
-          </div>
-
-          <select v-model="newItem.categoryName" class="smart-select">
-            <option
-              v-for="cat in souvenirData.categories"
-              :key="cat.name"
-              :value="cat.name"
-            >
-              {{ cat.name }}
-            </option>
-            <option value="其他">其他</option>
-          </select>
-
-          <button
-            class="add-confirm-btn"
-            @click="addNewSouvenir"
-            :disabled="!newItem.name"
-          >
-            新增
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <div class="categories-container">
-      <section
-        v-for="(category, idx) in categories"
-        :key="idx"
-        class="category-block"
-      >
-        <div class="category-header">
-          <span class="cat-icon-box">{{ category.icon }}</span>
-          <h2 class="cat-name">{{ category.name }}</h2>
-          <div class="cat-line"></div>
-        </div>
-
-        <div class="souvenir-grid">
-          <div
-            v-for="(item, itemIdx) in category.items"
-            :key="itemIdx"
-            class="premium-card"
-            :class="{
-              'is-purchased': isPurchased(idx, itemIdx),
-              'is-editing': editingId === item.id,
-            }"
-          >
-            <!-- Card Image Area -->
-            <div class="card-visual">
-              <div
-                class="main-image"
-                :style="{
-                  backgroundImage: `url(${item.image || 'https://via.placeholder.com/400x300?text=No+Photo'})`,
-                }"
-              ></div>
-              <div v-if="item.price" class="price-medal">
-                <span class="medal-label">€</span>
-                <span class="medal-value">{{ item.price }}</span>
-              </div>
-              <button
-                v-if="item.isCustom && editingId !== item.id"
-                class="trash-btn"
-                @click.stop="deleteSouvenir(item)"
-              >
-                🗑️
-              </button>
-              <div v-if="isPurchased(idx, itemIdx)" class="bought-overlay">
-                <span class="check-mark">✓ 已收入口袋</span>
-              </div>
+      <transition name="fade">
+        <div v-if="showAddModal" class="v2-add-bar">
+          <div class="v2-add-inputs">
+            <div class="v2-img-pick" @click="triggerFileInput('qa-file-input')">
+              <div v-if="newItem.image" class="v2-preview" :style="{ backgroundImage: `url(${newItem.image})` }"></div>
+              <span v-else>📷</span>
+              <input id="qa-file-input" type="file" accept="image/*" class="hidden-input" @change="handleImageUpload($event, false)" />
             </div>
+            <input v-model="newItem.name" type="text" placeholder="品名..." class="v2-input name-in" />
+            <input v-model="newItem.price" type="text" placeholder="€ 價錢" class="v2-input price-in" />
+            <select v-model="newItem.categoryName" class="v2-input cat-in">
+              <option v-for="cat in souvenirData.categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <button class="v2-submit-btn" @click="addNewSouvenir" :disabled="!newItem.name">確認新增</button>
+        </div>
+      </transition>
+    </div>
 
-            <!-- Card Info Area -->
-            <div class="card-info">
-              <!-- Edit Mode -->
-              <div v-if="editingId === item.id" class="edit-zone">
-                <input
-                  v-model="editForm.name"
-                  class="edit-field name-field"
-                  placeholder="名稱"
-                />
-                <div class="edit-row">
-                  <input
-                    v-model="editForm.price"
-                    class="edit-field price-field"
-                    placeholder="價格"
-                  />
-                  <button
-                    class="edit-cam-btn"
-                    @click="triggerFileInput('edit-file-' + item.id)"
-                  >
-                    📷
-                  </button>
-                  <input
-                    :id="'edit-file-' + item.id"
-                    type="file"
-                    accept="image/*"
-                    class="hidden-input"
-                    @change="handleImageUpload($event, true)"
-                  />
-                </div>
-                <div class="edit-btns">
-                  <button class="save-btn" @click="saveEdit()">儲存</button>
-                  <button class="cancel-btn" @click="cancelEdit">取消</button>
-                </div>
-              </div>
-
-              <!-- View Mode -->
-              <template v-else>
-                <div class="card-top">
-                  <div class="text-wrap">
-                    <h3 class="name-zh">
-                      {{ item.name }}
-                      <span
-                        v-if="item.isCustom"
-                        class="pen-btn"
-                        @click.stop="startEdit(item)"
-                        >✏️</span
-                      >
-                    </h3>
-                    <p class="name-en">
-                      {{ item.nameEn || "Collection Item" }}
-                    </p>
+    <div class="v2-feed">
+      <div v-for="(category, idx) in categories" :key="idx" class="v2-cat-section">
+        <div class="v2-cat-title">
+          <span class="v2-cat-icon">{{ category.icon }}</span>
+          <h2>{{ category.name }}</h2>
+        </div>
+        <div class="v2-item-list">
+          <div v-for="(item, itemIdx) in category.items" :key="itemIdx" class="v2-post" :class="{ 'is-purchased': isPurchased(idx, itemIdx) }">
+            <div class="v2-post-visual">
+              <div class="v2-post-img" :style="{ backgroundImage: `url(${item.image || 'https://via.placeholder.com/600x400?text=No+Photo'})` }"></div>
+              <div v-if="item.price" class="v2-price-tag">€ {{ item.price }}</div>
+              <button v-if="item.isCustom" class="v2-delete-btn" @click.stop="deleteSouvenir(item)">✕</button>
+            </div>
+            <div class="v2-post-body">
+              <div class="v2-post-header">
+                <div v-if="editingId === item.id" class="v2-edit-mode">
+                  <input v-model="editForm.name" class="v2-edit-input" placeholder="名稱" />
+                  <div class="v2-edit-row">
+                    <input v-model="editForm.price" class="v2-edit-input" placeholder="價格" />
+                    <button class="v2-edit-cam" @click="triggerFileInput('edit-f-' + item.id)">📷</button>
+                    <input :id="'edit-f-' + item.id" type="file" accept="image/*" class="hidden-input" @change="handleImageUpload($event, true)" />
                   </div>
-                  <label class="premium-check">
-                    <input
-                      type="checkbox"
-                      :checked="isPurchased(idx, itemIdx)"
-                      @change="togglePurchased(idx, itemIdx)"
-                    />
-                    <span class="check-box-ui"></span>
+                  <div class="v2-edit-actions">
+                    <button @click="saveEdit()">儲存</button>
+                    <button @click="cancelEdit" class="can-btn">取消</button>
+                  </div>
+                </div>
+                <template v-else>
+                  <div class="v2-post-info">
+                    <h3 class="v2-post-name">{{ item.name }} <span v-if="item.isCustom" class="v2-pen" @click.stop="startEdit(item)">✏️</span></h3>
+                    <p class="v2-post-en">{{ item.nameEn || 'SOUVENIR' }}</p>
+                  </div>
+                  <label class="v2-checkbox">
+                    <input type="checkbox" :checked="isPurchased(idx, itemIdx)" @change="togglePurchased(idx, itemIdx)" />
+                    <span class="v2-check-ui"></span>
                   </label>
+                </template>
+              </div>
+              <div class="v2-post-meta" v-if="item.price && editingId !== item.id">
+                <span class="v2-twd">估計金額：{{ formatPrice(item.price) }}</span>
+              </div>
+              <div class="v2-post-details">
+                <p v-if="item.description" class="v2-desc">{{ item.description }}</p>
+                <div class="v2-tags">
+                  <span v-if="item.where" class="v2-tag">📍 {{ item.where }}</span>
+                  <span v-if="item.tips" class="v2-tag tip">💡 {{ item.tips }}</span>
                 </div>
-
-                <div class="conversion-box" v-if="item.price">
-                  <span class="conv-label">預估金額</span>
-                  <span class="conv-value">{{ formatPrice(item.price) }}</span>
-                </div>
-
-                <button
-                  class="details-toggle"
-                  @click="toggleExpand(idx, itemIdx)"
-                >
-                  {{ isExpanded(idx, itemIdx) ? "簡單顯示" : "詳細資訊" }}
-                </button>
-
-                <transition name="slice">
-                  <div v-show="isExpanded(idx, itemIdx)" class="extra-info">
-                    <div class="info-piece">
-                      <span class="p-icon">�</span>
-                      <p>{{ item.where || "--" }}</p>
-                    </div>
-                    <div v-if="item.tips" class="info-piece tip-piece">
-                      <span class="p-icon">�</span>
-                      <p>{{ item.tips }}</p>
-                    </div>
-                    <p class="desc-text">{{ item.description }}</p>
-                  </div>
-                </transition>
-              </template>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* 全域變數 */
-:host {
-  --paris-blue: #1e293b;
-  --paris-accent: #6366f1;
-  --paris-gold: #f59e0b;
-  --paris-bg: #f8fafc;
-  --card-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  --card-radius: 24px;
-}
-
-.souvenir-page {
-  background-color: #f8fafc;
-  min-height: 100vh;
-  padding-bottom: 100px;
-}
-
-/* Hero Section */
-.souvenir-hero {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  padding: 60px 24px 80px;
-  text-align: center;
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: 12px;
-  letter-spacing: -1px;
-}
-
-.hero-subtitle {
-  font-size: 1.1rem;
-  opacity: 0.8;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-/* Smart Add Bar */
-.smart-add-wrapper {
-  position: absolute;
-  bottom: -32px;
-  left: 20px;
-  right: 20px;
-  max-width: 900px;
-  margin: 0 auto;
-  z-index: 10;
-}
-
-.smart-add-bar {
-  background: white;
-  padding: 10px;
-  border-radius: 20px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid #e2e8f0;
-}
-
-.image-uploader {
-  width: 44px;
-  height: 44px;
-  background: #f1f5f9;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  overflow: hidden;
-  border: 2px solid transparent;
-  transition: all 0.2s;
-}
-
-.image-uploader:hover {
-  border-color: #6366f1;
-}
-
-.preview-mini {
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-}
-
-.hidden-input {
-  display: none;
-}
-
-.input-group {
-  flex: 1;
-  position: relative;
-}
-
-.smart-input {
-  width: 100%;
-  border: none;
-  background: transparent;
-  padding: 10px 4px;
-  font-size: 16px; /* 防止 iOS 縮放 */
-  outline: none;
-  color: #1e293b;
-  font-weight: 600;
-}
-
-.price-group {
-  display: flex;
-  align-items: center;
-  max-width: 100px;
-  border-right: 1px solid #f1f5f9;
-  border-left: 1px solid #f1f5f9;
-  padding: 0 10px;
-}
-
-.currency-tag {
-  color: #94a3b8;
-  font-weight: 700;
-  margin-right: 4px;
-}
-
-.smart-select {
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  color: #64748b;
-  padding: 0 8px;
-  outline: none;
-  cursor: pointer;
-}
-
-.add-confirm-btn {
-  padding: 10px 20px;
-  background: #6366f1;
-  color: white;
-  border: none;
-  border-radius: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.add-confirm-btn:hover {
-  background: #4f46e5;
-  transform: translateY(-1px);
-}
-
-.add-confirm-btn:disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
-}
-
-/* Categories Area */
-.categories-container {
-  max-width: 1100px;
-  margin: 60px auto 0;
-  padding: 0 20px;
-}
-
-.category-block {
-  margin-bottom: 60px;
-}
-
-.category-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.cat-icon-box {
-  width: 48px;
-  height: 48px;
-  background: white;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.cat-name {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #1e293b;
-  white-space: nowrap;
-}
-
-.cat-line {
-  height: 2px;
-  background: #e2e8f0;
-  flex: 1;
-}
-
-/* Premium Cards */
-.souvenir-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-}
-
-.premium-card {
-  background: white;
-  border-radius: var(--card-radius);
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  display: flex;
-  flex-direction: column;
-}
-
-.premium-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
-}
-
-.card-visual {
-  height: 220px;
-  position: relative;
-  overflow: hidden;
-}
-
-.main-image {
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  transition: transform 0.6s ease;
-}
-
-.premium-card:hover .main-image {
-  transform: scale(1.05);
-}
-
-.price-medal {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 6px 14px;
-  border-radius: 30px;
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 2;
-}
-
-.medal-label {
-  color: #6366f1;
-  font-weight: 800;
-  font-size: 0.9rem;
-}
-
-.medal-value {
-  color: #1e293b;
-  font-weight: 800;
-  font-size: 1rem;
-}
-
-.trash-btn {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0;
-  transform: translateX(-10px);
-  transition: all 0.3s ease;
-}
-
-.premium-card:hover .trash-btn {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.bought-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(99, 102, 241, 0.4);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3;
-}
-
-.check-mark {
-  background: white;
-  color: #6366f1;
-  padding: 8px 20px;
-  border-radius: 40px;
-  font-weight: 800;
-  font-size: 0.9rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.card-info {
-  padding: 24px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.name-zh {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #1e293b;
-  margin: 0;
-  display: flex;
-  align-items: center;
-}
-
-.pen-btn {
-  font-size: 14px;
-  margin-left: 8px;
-  cursor: pointer;
-  opacity: 0.3;
-  transition: opacity 0.2s;
-}
-
-.premium-card:hover .pen-btn {
-  opacity: 0.7;
-}
-.pen-btn:hover {
-  opacity: 1 !important;
-  color: #6366f1;
-}
-
-.name-en {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  margin: 4px 0 0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-/* Premium Checkbox */
-.premium-check {
-  cursor: pointer;
-}
-
-.premium-check input {
-  display: none;
-}
-
-.check-box-ui {
-  width: 28px;
-  height: 28px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  display: block;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.premium-check input:checked + .check-box-ui {
-  background: #6366f1;
-  border-color: #6366f1;
-}
-
-.check-box-ui::after {
-  content: "✓";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  color: white;
-  font-weight: 800;
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.premium-check input:checked + .check-box-ui::after {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.conversion-box {
-  background: #f1f5f9;
-  padding: 12px 16px;
-  border-radius: 16px;
-  margin-bottom: 16px;
-}
-
-.conv-label {
-  display: block;
-  font-size: 0.75rem;
-  color: #94a3b8;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.conv-value {
-  font-size: 0.95rem;
-  color: #1e293b;
-  font-weight: 700;
-}
-
-.details-toggle {
-  width: 100%;
-  background: none;
-  border: 1px solid #f1f5f9;
-  padding: 8px;
-  border-radius: 12px;
-  color: #64748b;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: auto;
-}
-
-.details-toggle:hover {
-  background: #f8fafc;
-  color: #1e293b;
-}
-
-.extra-info {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed #f1f5f9;
-}
-
-.info-piece {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  color: #475569;
-}
-
-.tip-piece {
-  background: #fefce8;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border-left: 4px solid #f59e0b;
-}
-
-.desc-text {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #64748b;
-  margin-top: 12px;
-}
-
-/* Edit Mode Styles */
-.edit-zone {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.edit-field {
-  width: 100%;
-  padding: 10px 14px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 16px;
-  background: #f8fafc;
-}
-
-.edit-field:focus {
-  border-color: #6366f1;
-  outline: none;
-  background: white;
-}
-
-.edit-row {
-  display: flex;
-  gap: 8px;
-}
-
-.edit-cam-btn {
-  width: 44px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.edit-btns {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.edit-btns button {
-  flex: 1;
-  padding: 10px;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.save-btn {
-  background: #6366f1;
-  color: white;
-  border: none;
-}
-.cancel-btn {
-  background: #f1f5f9;
-  color: #64748b;
-  border: none;
-}
-
-/* Mobile Adjustments */
-@media (max-width: 640px) {
-  .souvenir-hero {
-    padding: 40px 20px 60px;
-  }
-
-  .hero-title {
-    font-size: 1.8rem;
-  }
-
-  .smart-add-wrapper {
-    position: relative; /* 改為相對定位，避免遮擋內容 */
-    bottom: auto;
-    left: 0;
-    right: 0;
-    margin-top: -30px;
-    padding: 0 15px;
-  }
-
-  .smart-add-bar {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .image-uploader {
-    width: 100%;
-    height: 120px;
-    border-radius: 16px;
-  }
-
-  .price-group {
-    max-width: none;
-    border: 1px solid #f1f5f9;
-    border-radius: 12px;
-    padding: 2px 12px;
-  }
-
-  .smart-select {
-    width: 100%;
-    border: 1px solid #f1f5f9;
-    border-radius: 12px;
-    padding: 12px;
-    text-align: center;
-  }
-
-  .add-confirm-btn {
-    width: 100%;
-    padding: 14px;
-    font-size: 1rem;
-  }
-
-  .categories-container {
-    margin-top: 30px; /* 因為 smart-add-wrapper 改為 relative，這裡間距要調小 */
-  }
-
-  .souvenir-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .premium-card {
-    border-radius: 20px;
-  }
-
-  .card-visual {
-    height: 180px;
-  }
-
-  .cat-name {
-    font-size: 1.25rem;
-  }
-}
-
-/* Animations */
-.slice-enter-active,
-.slice-leave-active {
-  transition: all 0.3s ease;
-  max-height: 200px;
-}
-.slice-enter-from,
-.slice-leave-to {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-10px);
-}
+.souvenir-v2 { background-color: #ffffff; min-height: 100vh; padding-bottom: 50px; }
+.v2-header { position: sticky; top: 0; z-index: 1000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border-bottom: 1px solid #efefef; padding: 12px 16px; }
+.v2-header-top { display: flex; justify-content: space-between; align-items: center; }
+.v2-title { font-size: 20px; font-weight: 800; color: #262626; margin: 0; }
+.v2-add-toggle { background: #0095f6; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 14px; }
+.v2-add-bar { margin-top: 12px; padding: 12px; background: #fafafa; border-radius: 12px; border: 1px solid #dbdbdb; }
+.v2-add-inputs { display: grid; grid-template-columns: 50px 1fr; grid-template-areas: "img name" "img price" "img cat"; gap: 8px; }
+.v2-img-pick { grid-area: img; width: 50px; height: 50px; background: #efefef; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; }
+.v2-preview { width: 100%; height: 100%; background-size: cover; background-position: center; }
+.v2-input { border: 1px solid #dbdbdb; border-radius: 4px; padding: 6px 8px; font-size: 16px; background: white; width: 100%; box-sizing: border-box; }
+.name-in { grid-area: name; }
+.price-in { grid-area: price; }
+.cat-in { grid-area: cat; }
+.v2-submit-btn { width: 100%; margin-top: 10px; background: #262626; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 700; }
+.v2-submit-btn:disabled { opacity: 0.3; }
+.v2-feed { max-width: 600px; margin: 0 auto; padding: 16px 0; }
+.v2-cat-section { margin-bottom: 32px; }
+.v2-cat-title { display: flex; align-items: center; gap: 8px; padding: 0 16px 12px; }
+.v2-cat-icon { font-size: 20px; }
+.v2-cat-title h2 { font-size: 14px; font-weight: 700; color: #8e8e8e; text-transform: uppercase; margin: 0; }
+.v2-item-list { display: flex; flex-direction: column; }
+.v2-post { background: white; border-bottom: 1px solid #efefef; padding-bottom: 16px; margin-bottom: 16px; }
+.v2-post:last-child { border-bottom: none; }
+.v2-post-visual { width: 100%; aspect-ratio: 4 / 3; position: relative; background: #fafafa; overflow: hidden; }
+.v2-post-img { width: 100%; height: 100%; background-size: cover; background-position: center; transition: transform 0.5s ease; }
+.v2-post:hover .v2-post-img { transform: scale(1.02); }
+.v2-price-tag { position: absolute; top: 12px; right: 12px; background: rgba(0, 0, 0, 0.75); color: white; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 13px; backdrop-filter: blur(4px); }
+.v2-delete-btn { position: absolute; top: 12px; left: 12px; width: 32px; height: 32px; background: rgba(255, 255, 255, 0.9); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #262626; opacity: 0.8; }
+.v2-post-body { padding: 12px 16px 0; }
+.v2-post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.v2-post-name { font-size: 16px; font-weight: 700; color: #262626; margin: 0; display: flex; align-items: center; gap: 6px; }
+.v2-pen { font-size: 12px; cursor: pointer; opacity: 0.2; transition: opacity 0.2s; }
+.v2-post:hover .v2-pen { opacity: 0.6; }
+.v2-post-en { font-size: 11px; color: #8e8e8e; text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+.v2-checkbox { cursor: pointer; }
+.v2-checkbox input { display: none; }
+.v2-check-ui { width: 24px; height: 24px; border: 1px solid #dbdbdb; border-radius: 50%; display: block; position: relative; transition: all 0.2s; }
+.v2-checkbox input:checked + .v2-check-ui { background: #0095f6; border-color: #0095f6; }
+.v2-check-ui::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); color: white; font-size: 12px; font-weight: 800; }
+.v2-checkbox input:checked + .v2-check-ui::after { transform: translate(-50%, -50%) scale(1); }
+.v2-post-meta { margin-bottom: 8px; }
+.v2-twd { font-size: 13px; color: #262626; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+.v2-desc { font-size: 14px; line-height: 1.6; color: #4b5563; margin-bottom: 12px; }
+.v2-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.v2-tag { font-size: 12px; background: #f9fafb; border: 1px solid #f3f4f6; padding: 4px 10px; border-radius: 6px; color: #6b7280; }
+.v2-tag.tip { background: #fffbeb; border-color: #fef3c7; color: #b45309; }
+.is-purchased .v2-post-visual { filter: grayscale(0.6); opacity: 0.8; }
+.v2-edit-mode { width: 100%; padding: 8px 0; }
+.v2-edit-input { width: 100%; border: 1px solid #efefef; padding: 10px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; background: #f9fafb; }
+.v2-edit-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.v2-edit-cam { background: #efefef; border: none; padding: 8px 16px; border-radius: 8px; font-size: 18px; }
+.v2-edit-actions { display: flex; gap: 8px; }
+.v2-edit-actions button { flex: 1; background: #262626; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; }
+.v2-edit-actions .can-btn { background: #efefef; color: #262626; }
+.fade-enter-active, .fade-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-20px); }
+.hidden-input { display: none; }
+@media (max-width: 600px) { .v2-feed { padding-top: 0; } .v2-post-visual { aspect-ratio: 1 / 1; } }
 </style>
-```
