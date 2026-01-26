@@ -1,55 +1,207 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { souvenirData } from '../data/souvenirs'
+import { ref, computed, onMounted } from "vue";
+import { souvenirData } from "../data/souvenirs";
 
-const categories = ref(souvenirData.categories)
-const expandedItems = ref(new Set())
-const purchasedItems = ref(new Set())
+const userSouvenirs = ref([]);
+const showAddModal = ref(false);
+const newItem = ref({
+  categoryName: souvenirData.categories[0].name,
+  name: "",
+  nameEn: "",
+  description: "",
+  price: "",
+  where: "",
+  tips: "",
+  image: "",
+});
 
-// 從 localStorage 載入已購買狀態
+const categories = computed(() => {
+  // 深拷貝原始資料
+  const combined = JSON.parse(JSON.stringify(souvenirData.categories));
+
+  // 將使用者新增的項目加入對應類別
+  userSouvenirs.value.forEach((item) => {
+    let category = combined.find((c) => c.name === item.categoryName);
+    if (!category) {
+      category = {
+        name: item.categoryName,
+        icon: "🎁",
+        items: [],
+      };
+      combined.push(category);
+    }
+    category.items.push({ ...item, isCustom: true });
+  });
+
+  return combined;
+});
+
+const expandedItems = ref(new Set());
+const purchasedItems = ref(new Set());
+
+// 從 localStorage 載入狀態
 onMounted(() => {
-  const saved = localStorage.getItem('purchasedSouvenirs')
-  if (saved) {
-    purchasedItems.value = new Set(JSON.parse(saved))
+  const savedPurchased = localStorage.getItem("purchasedSouvenirs");
+  if (savedPurchased) {
+    purchasedItems.value = new Set(JSON.parse(savedPurchased));
   }
-})
+
+  const savedUserSouvenirs = localStorage.getItem("userSouvenirs");
+  if (savedUserSouvenirs) {
+    userSouvenirs.value = JSON.parse(savedUserSouvenirs);
+  }
+});
 
 function toggleExpand(categoryIdx, itemIdx) {
-  const key = `${categoryIdx}-${itemIdx}`
+  const key = `${categoryIdx}-${itemIdx}`;
   if (expandedItems.value.has(key)) {
-    expandedItems.value.delete(key)
+    expandedItems.value.delete(key);
   } else {
-    expandedItems.value.add(key)
+    expandedItems.value.add(key);
   }
 }
 
 function isExpanded(categoryIdx, itemIdx) {
-  return expandedItems.value.has(`${categoryIdx}-${itemIdx}`)
+  return expandedItems.value.has(`${categoryIdx}-${itemIdx}`);
 }
 
 function togglePurchased(categoryIdx, itemIdx) {
-  const key = `${categoryIdx}-${itemIdx}`
+  const key = `${categoryIdx}-${itemIdx}`;
   if (purchasedItems.value.has(key)) {
-    purchasedItems.value.delete(key)
+    purchasedItems.value.delete(key);
   } else {
-    purchasedItems.value.add(key)
+    purchasedItems.value.add(key);
   }
   // 保存到 localStorage
-  localStorage.setItem('purchasedSouvenirs', JSON.stringify([...purchasedItems.value]))
+  localStorage.setItem(
+    "purchasedSouvenirs",
+    JSON.stringify([...purchasedItems.value]),
+  );
 }
 
 function isPurchased(categoryIdx, itemIdx) {
-  return purchasedItems.value.has(`${categoryIdx}-${itemIdx}`)
+  return purchasedItems.value.has(`${categoryIdx}-${itemIdx}`);
+}
+
+function addNewSouvenir() {
+  if (!newItem.value.name || !newItem.value.categoryName) return;
+
+  const itemToAdd = {
+    ...newItem.value,
+    id: Date.now(), // 用於刪除的唯一識別
+  };
+
+  userSouvenirs.value.push(itemToAdd);
+  saveUserSouvenirs();
+
+  // 重置表單
+  newItem.value = {
+    categoryName: souvenirData.categories[0].name,
+    name: "",
+    nameEn: "",
+    description: "",
+    price: "",
+    where: "",
+    tips: "",
+    image: "",
+  };
+  showAddModal.value = false;
+}
+
+function deleteSouvenir(item) {
+  if (!confirm("確定要刪除這個伴手禮嗎？")) return;
+  userSouvenirs.value = userSouvenirs.value.filter((s) => s.id !== item.id);
+  saveUserSouvenirs();
+}
+
+function saveUserSouvenirs() {
+  localStorage.setItem("userSouvenirs", JSON.stringify(userSouvenirs.value));
 }
 </script>
 
 <template>
   <div class="souvenir-page">
- 
+    <div class="actions-bar">
+      <button class="add-btn" @click="showAddModal = true">
+        ➕ 新增自定義伴手禮
+      </button>
+    </div>
+
+    <!-- 新增對話框 -->
+    <div
+      v-if="showAddModal"
+      class="modal-overlay"
+      @click.self="showAddModal = false"
+    >
+      <div class="modal-content">
+        <h3>新增伴手禮</h3>
+        <div class="form-group">
+          <label>名稱*</label>
+          <input v-model="newItem.name" placeholder="例如: 聖米歇爾山餅乾" />
+        </div>
+        <div class="form-group">
+          <label>英文名稱</label>
+          <input
+            v-model="newItem.nameEn"
+            placeholder="例如: St. Michel Biscuits"
+          />
+        </div>
+        <div class="form-group">
+          <label>類別*</label>
+          <select v-model="newItem.categoryName">
+            <option
+              v-for="cat in souvenirData.categories"
+              :key="cat.name"
+              :value="cat.name"
+            >
+              {{ cat.name }}
+            </option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>價格</label>
+          <input v-model="newItem.price" placeholder="例如: 約 €4-6" />
+        </div>
+        <div class="form-group">
+          <label>購買地點</label>
+          <input v-model="newItem.where" placeholder="例如: 各大超市" />
+        </div>
+        <div class="form-group">
+          <label>描述</label>
+          <textarea
+            v-model="newItem.description"
+            placeholder="簡單介紹一下這個伴手禮..."
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label>提示 (Tips)</label>
+          <input v-model="newItem.tips" placeholder="小撇步或注意事項" />
+        </div>
+        <div class="form-group">
+          <label>圖片網址</label>
+          <input v-model="newItem.image" placeholder="https://..." />
+        </div>
+        <div class="modal-actions">
+          <button class="cancel-btn" @click="showAddModal = false">取消</button>
+          <button
+            class="submit-btn"
+            :disabled="!newItem.name"
+            @click="
+              addNewSouvenir();
+              showAddModal = false;
+            "
+          >
+            新增
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="categories">
-      <section 
-        v-for="(category, idx) in categories" 
-        :key="idx" 
+      <section
+        v-for="(category, idx) in categories"
+        :key="idx"
         class="category-section"
       >
         <h2 class="category-title">
@@ -58,16 +210,30 @@ function isPurchased(categoryIdx, itemIdx) {
         </h2>
 
         <div class="items-grid">
-          <div 
-            v-for="(item, itemIdx) in category.items" 
-            :key="itemIdx" 
+          <div
+            v-for="(item, itemIdx) in category.items"
+            :key="itemIdx"
             class="souvenir-card"
             :class="{ purchased: isPurchased(idx, itemIdx) }"
           >
-            <div class="card-image" :style="{ backgroundImage: `url(${item.image})` }">
-              <div v-if="isPurchased(idx, itemIdx)" class="purchased-badge">✓ 已購買</div>
+            <div
+              class="card-image"
+              :style="{
+                backgroundImage: `url(${item.image || 'https://via.placeholder.com/300x200?text=No+Image'})`,
+              }"
+            >
+              <div v-if="isPurchased(idx, itemIdx)" class="purchased-badge">
+                ✓ 已購買
+              </div>
+              <button
+                v-if="item.isCustom"
+                class="delete-btn"
+                @click.stop="deleteSouvenir(item)"
+              >
+                🗑️
+              </button>
             </div>
-            
+
             <div class="card-content">
               <div class="card-header-row">
                 <div class="title-group">
@@ -75,30 +241,27 @@ function isPurchased(categoryIdx, itemIdx) {
                   <p class="item-name-en">{{ item.nameEn }}</p>
                 </div>
                 <label class="checkbox-container">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :checked="isPurchased(idx, itemIdx)"
                     @change="togglePurchased(idx, itemIdx)"
                   />
                   <span class="checkmark"></span>
                 </label>
               </div>
-              
-              <button 
-                class="expand-btn"
-                @click="toggleExpand(idx, itemIdx)"
-              >
-                {{ isExpanded(idx, itemIdx) ? '收起詳情 ▲' : '查看詳情 ▼' }}
+
+              <button class="expand-btn" @click="toggleExpand(idx, itemIdx)">
+                {{ isExpanded(idx, itemIdx) ? "收起詳情 ▲" : "查看詳情 ▼" }}
               </button>
-              
+
               <div v-show="isExpanded(idx, itemIdx)" class="item-details">
                 <p class="item-description">{{ item.description }}</p>
-                
-                <div class="detail-row">
+
+                <div v-if="item.price" class="detail-row">
                   <span class="detail-icon">💰</span>
                   <span class="detail-text">{{ item.price }}</span>
                 </div>
-                <div class="detail-row">
+                <div v-if="item.where" class="detail-row">
                   <span class="detail-icon">📍</span>
                   <span class="detail-text">{{ item.where }}</span>
                 </div>
@@ -364,6 +527,147 @@ function isPurchased(categoryIdx, itemIdx) {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+/* 新增功能樣式 */
+.actions-bar {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.add-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+.delete-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+/* Modal 樣式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.form-group textarea {
+  height: 80px;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+}
+
+.submit-btn {
+  background: #4f46e5;
+  border: none;
+  color: white;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 響應式設計 */

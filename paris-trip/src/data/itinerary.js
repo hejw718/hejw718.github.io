@@ -30,12 +30,22 @@ export const itineraryData = {
             {
                 type: 'card',
                 category: '住宿',
-                title: 'Leonardo Boutique Hotel Paris Opera',
+                title: 'HÔTEL EXCELSIOR PARIS OPÉRA',
                 time: '抵達後 Check-in',
                 description: '位於歌劇院區的精品飯店，交通便利，步行可達多個地鐵站',
                 hours: ['Check-in: 15:00', 'Check-out: 12:00'],
-                location: '22 Rue de la Victoire, 75009 Paris, France',
+                location: '5 Rue La Fayette, 75009 Paris, France',
                 image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'
+            },
+            {
+                type: 'card',
+                category: '票券/景點',
+                title: '巴黎歌劇院 (Palais Garnier) & Navigo 週票',
+                time: '下午',
+                description: '參觀壯麗的歌劇院。同時建議在此購買 Navigo Découverte 週票（需準備 1 吋照片一張）。',
+                hours: ['歌劇院參觀: 10:00–17:00', '地鐵站票務櫃檯可購買 Navigo'],
+                location: 'Pl. de l\'Opéra, 75009 Paris, France',
+                image: 'https://images.unsplash.com/photo-1590490359854-dfba1d223847?w=800'
             }
         ]
     },
@@ -46,11 +56,11 @@ export const itineraryData = {
             {
                 type: 'transit',
                 mode: 'TRANSIT',
-                origin: 'Leonardo Boutique Hotel Paris Opera',
+                origin: 'HÔTEL EXCELSIOR PARIS OPÉRA',
                 destination: 'Café Charlot Paris',
                 icon: '🚇',
                 duration: '約 20 分鐘',
-                route: '從飯店前往 Café Charlot<br>搭乘 M9 或 M8 至 République 站，下車後步行 5 分鐘'
+                route: '從飯店前往 Café Charlot<br>搭乘 M9 至 République 站，下車後步行 5 分鐘'
             },
             {
                 type: 'card',
@@ -114,26 +124,26 @@ export const itineraryData = {
                 type: 'transit',
                 mode: 'WALKING',
                 origin: 'Marché des Enfants Rouges',
-                destination: 'Ober Mamma Paris',
+                destination: 'Ober Mamma',
                 icon: '🚶',
-                duration: '約 12 分鐘',
-                route: '步行前往 Ober Mamma (約 900 公尺)'
+                duration: '約 10 分鐘',
+                route: '步行前往 Ober Mamma<br>沿著 Rue de Bretagne 向東步行至 Blvd Richard-Lenoir'
             },
             {
                 type: 'card',
                 category: '午餐',
                 title: 'Ober Mamma',
-                time: '12:30 - 13:30',
-                description: '人氣義式餐廳, 建議提早排隊 ',
-                hours: ['通常 12:00 開始營業'],
-                location: 'Ober Mamma Paris',
-                image: 'https://images.unsplash.com/photo-1582239339097-9e4a3b19280d?w=800'
+                time: '12:30 - 14:00',
+                description: '人氣義大利餐廳，以玻璃屋頂和美味的拿坡里披薩聞名。',
+                hours: ['週一至週五 12:00–14:30, 18:45–22:45', '週六日 12:00–15:30, 18:45–23:00'],
+                location: '107 Boulevard Richard-Lenoir, 75011 Paris',
+                image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800'
             },
             {
                 type: 'card',
                 category: '甜點',
                 title: 'Le Comptoir de Madeleine',
-                time: '13:35 - 13:50',
+                time: '14:15 - 14:30',
                 description: '購買瑪德琳蛋糕，可外帶作下午小點心 ',
                 hours: ['請依現場營業時間為準'],
                 location: 'Le Comptoir de Madeleine',
@@ -142,11 +152,11 @@ export const itineraryData = {
             {
                 type: 'transit',
                 mode: 'TRANSIT',
-                origin: 'Ober Mamma Paris',
+                origin: 'Ober Mamma',
                 destination: 'Sacré-Cœur Paris',
                 icon: '🚇',
                 duration: '約 25 分鐘',
-                route: '前往聖心堂<br>步行至 Oberkampf (M5) → 轉乘 M2 → Abbesses 站'
+                route: '前往聖心堂<br>搭乘 M5 從 Richard-Lenoir 站至 Gare du Nord 轉 M4 至 Château Rouge，或步行至 Saint-Sébastien - Froissart 搭乘 M8/M9'
             },
             {
                 type: 'card',
@@ -200,12 +210,12 @@ export const itineraryData = {
             {
                 type: 'card',
                 category: '晚餐',
-                title: 'Le Consulat',
-                time: '19:00 - 20:00',
-                description: '蒙馬特地區經典法式餐廳 ',
-                hours: ['請查閱官網確認'],
-                location: 'Le Consulat, 18 Rue Norvins, 75018 Paris, France',
-                image: 'https://images.unsplash.com/photo-1577782390886-07469a4c14c5?w=800'
+                title: 'Abuela Pigalle',
+                time: '19:00 - 20:30',
+                description: '道地的西班牙料理與 Tapas，裝潢充滿復古風格。',
+                hours: ['每日 11:30–01:00'],
+                location: '10 Boulevard de Clichy, 75018 Paris',
+                image: 'https://images.unsplash.com/photo-1582239339097-9e4a3b19280d?w=800'
             }
         ]
     },
@@ -216,11 +226,11 @@ export const itineraryData = {
             {
                 type: 'transit',
                 mode: 'TRANSIT',
-                origin: 'Leonardo Boutique Hotel Paris Opera',
+                origin: 'HÔTEL EXCELSIOR PARIS OPÉRA',
                 destination: 'Gare Montparnasse',
                 icon: '🚇',
                 duration: '約 25 分鐘',
-                route: '從飯店前往蒙帕納斯車站<br>Grands Boulevards (M8/M9) → Montparnasse Bienvenue'
+                route: '從飯店前往蒙帕納斯車站<br>Chaussée d\'Antin - La Fayette (M9/M7) 轉乘至 Montparnasse Bienvenue'
             },
             {
                 type: 'transit',
@@ -265,7 +275,7 @@ export const itineraryData = {
                 type: 'transit',
                 mode: 'TRANSIT',
                 origin: 'Rennes Station',
-                destination: 'Leonardo Boutique Hotel Paris Opera',
+                destination: 'HÔTEL EXCELSIOR PARIS OPÉRA',
                 icon: '🚂',
                 duration: '19:35 - 21:16',
                 route: '返回巴黎 (Montparnasse)<br>19:35 TGV INOUI 8736 → 21:16 抵達巴黎 '
@@ -289,11 +299,11 @@ export const itineraryData = {
             {
                 type: 'transit',
                 mode: 'WALKING',
-                origin: 'Leonardo Boutique Hotel Paris Opera',
+                origin: 'HÔTEL EXCELSIOR PARIS OPÉRA',
                 destination: 'Arc de Triomphe Paris',
                 icon: '🚇',
                 duration: '約 20 分鐘',
-                route: '從飯店出發前往凱旋門<br>Grands Boulevards (M8/M9) → Charles de Gaulle Étoile'
+                route: '從飯店出發前往凱旋門<br>Chaussée d\'Antin - La Fayette (M9) 直達 Charles de Gaulle Étoile'
             },
             {
                 type: 'card',
@@ -415,13 +425,13 @@ export const itineraryData = {
                 time: '07:30 - 08:15',
                 description: '建議吃簡單早餐，並攜帶水與小零食備用 。',
                 hours: ['請依現場營業時間為準'],
-                location: 'Leonardo Boutique Hotel Paris Opera 附近',
+                location: 'HÔTEL EXCELSIOR PARIS OPÉRA 附近',
                 image: 'https://images.unsplash.com/photo-1570779836365-a6e5b22b109c?w=800' // 使用杜樂麗花園圖片替代
             },
             {
                 type: 'transit',
                 mode: 'TRANSIT',
-                origin: 'Leonardo Boutique Hotel Paris Opera',
+                origin: 'HÔTEL EXCELSIOR PARIS OPÉRA',
                 destination: 'Disneyland Paris',
                 icon: '🚈',
                 duration: '約 50 分鐘',
@@ -490,7 +500,7 @@ export const itineraryData = {
                 type: 'transit',
                 mode: 'TRANSIT',
                 origin: 'Disneyland Paris',
-                destination: 'Leonardo Boutique Hotel Paris Opera',
+                destination: 'HÔTEL EXCELSIOR PARIS OPÉRA',
                 icon: '🚈',
                 duration: '約 60 分鐘',
                 route: '搭乘 RER A 線返回 Auber 站，步行 5 分鐘回飯店'
@@ -527,7 +537,7 @@ export const itineraryData = {
                 destination: 'Louvre Museum Paris',
                 icon: '🚇',
                 duration: '約 15 分鐘',
-                route: '從飯店步行或搭地鐵前往羅浮宮<br>Grands Boulevards (M8/M9) → Palais Royal - Musée du Louvre'
+                route: '從飯店前往羅浮宮<br>Chaussée d\'Antin - La Fayette (M7) 直達 Palais Royal - Musée du Louvre'
             },
             {
                 type: 'card',
@@ -696,7 +706,17 @@ export const itineraryData = {
                 destination: 'Le Bistrot des Fables',
                 icon: '🚈',
                 duration: '約 60-70 分鐘',
-                route: '返回巴黎市區<br>搭乘 RER C 線返回，轉乘地鐵至餐廳附近'
+                route: '返回巴黎市區<br>搭乘 RER C 線返回，轉乘地鐵至餐廳或春天百貨附近'
+            },
+            {
+                type: 'card',
+                category: '購物',
+                title: '春天百貨 (Printemps Haussmann)',
+                time: '14:30 - 16:30',
+                description: '位於飯店隔壁的經典百貨公司。出示此邀請函可享 95 折優惠與 12% 退稅。',
+                hours: ['週一至週六 10:00 - 20:00', '週日 11:00 - 20:00'],
+                location: '64 Bd Haussmann, 75009 Paris, France',
+                image: './images/printemps-voucher.png'
             },
             {
                 type: 'card',
